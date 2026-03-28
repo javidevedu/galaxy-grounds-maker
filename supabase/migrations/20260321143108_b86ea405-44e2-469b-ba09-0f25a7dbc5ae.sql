@@ -1,0 +1,1 @@
+ALTER TABLE public.answers ADD COLUMN writing_feedback jsonb DEFAULT NULL;

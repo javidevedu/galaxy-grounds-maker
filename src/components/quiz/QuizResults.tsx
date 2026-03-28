@@ -1,0 +1,305 @@
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { CheckCircle2, XCircle, BookOpen, Headphones, PenLine, Mic, Loader2 } from 'lucide-react';
+import type { Tables } from '@/integrations/supabase/types';
+import type { Json } from '@/integrations/supabase/types';
+
+type Question = Tables<'questions'>;
+
+interface WritingFeedback {
+  spelling_errors: { word: string; correction: string; context: string }[];
+  grammar_errors: { error: string; correction: string; context: string }[];
+  topics_used: string[];
+  topics_missing: string[];
+  overall_score: number;
+  feedback: string;
+}
+
+interface QuizResultsProps {
+  questions: Question[];
+  answers: Record<string, string>;
+  attemptId: string;
+  scorableCorrect: number;
+  scorableTotal: number;
+}
+
+export default function QuizResults({ questions, answers, attemptId, scorableCorrect, scorableTotal }: QuizResultsProps) {
+  const [writingFeedbacks, setWritingFeedbacks] = useState<Record<string, WritingFeedback | null>>({});
+  const [loadingFeedback, setLoadingFeedback] = useState(true);
+
+  const readingQs = questions.filter(q => q.type === 'multiple_choice');
+  const listeningQs = questions.filter(q => q.type === 'listening');
+  const writingQs = questions.filter(q => q.type === 'writing');
+  const speakingQs = questions.filter(q => q.type === 'speaking');
+  const fillBlankQs = questions.filter(q => q.type === 'fill_blank');
+
+  // Poll for writing feedback
+  useEffect(() => {
+    if (writingQs.length === 0) {
+      setLoadingFeedback(false);
+      return;
+    }
+
+    let attempts = 0;
+    const maxAttempts = 20;
+
+    const poll = async () => {
+      const { data } = await supabase
+        .from('answers')
+        .select('question_id, writing_feedback')
+        .eq('attempt_id', attemptId)
+        .in('question_id', writingQs.map(q => q.id));
+
+      if (data) {
+        const feedbacks: Record<string, WritingFeedback | null> = {};
+        let allDone = true;
+        for (const row of data) {
+          if (row.writing_feedback) {
+            feedbacks[row.question_id] = row.writing_feedback as unknown as WritingFeedback;
+          } else {
+            allDone = false;
+            feedbacks[row.question_id] = null;
+          }
+        }
+        setWritingFeedbacks(feedbacks);
+        if (allDone || attempts >= maxAttempts) {
+          setLoadingFeedback(false);
+          return;
+        }
+      }
+      attempts++;
+      setTimeout(poll, 3000);
+    };
+
+    poll();
+  }, [attemptId]);
+
+  const isCorrect = (q: Question) => {
+    const ans = answers[q.id] || '';
+    if (q.type === 'fill_blank') return ans.trim().toLowerCase() === q.correct_answer.trim().toLowerCase();
+    return ans === q.correct_answer;
+  };
+
+  const sectionScore = (qs: Question[]) => {
+    const correct = qs.filter(q => isCorrect(q)).length;
+    return { correct, total: qs.length };
+  };
+
+  const readingScore = sectionScore(readingQs);
+  const listeningScore = sectionScore(listeningQs);
+  const fillBlankScore = sectionScore(fillBlankQs);
+  const percentage = scorableTotal > 0 ? Math.round((scorableCorrect / scorableTotal) * 100) : 0;
+
+  return (
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="max-w-3xl mx-auto space-y-6">
+        {/* Overall Score */}
+        <Card>
+          <CardContent className="py-8 text-center space-y-3">
+            <CheckCircle2 className="w-14 h-14 mx-auto text-primary" />
+            <h2 className="text-2xl font-heading font-bold">Quiz Completed!</h2>
+            <div className="text-5xl font-heading font-bold text-primary">
+              {scorableCorrect}<span className="text-2xl text-muted-foreground">/{scorableTotal}</span>
+            </div>
+            <p className="text-muted-foreground">{percentage}% correct</p>
+            <p className="text-xs text-muted-foreground italic">Speaking is graded by your teacher and is not included in this score.</p>
+          </CardContent>
+        </Card>
+
+        {/* Reading Section */}
+        {readingQs.length > 0 && (
+          <Card>
+            <CardContent className="py-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-heading font-bold">Reading</h3>
+                <Badge variant="outline" className="ml-auto">{readingScore.correct}/{readingScore.total}</Badge>
+              </div>
+              <div className="space-y-3">
+                {readingQs.map((q, i) => {
+                  const correct = isCorrect(q);
+                  const studentAns = answers[q.id] || '—';
+                  return (
+                    <div key={q.id} className={`p-4 rounded-lg border ${correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
+                      <div className="flex items-start gap-2">
+                        {correct ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />}
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium">{q.question_text}</p>
+                          <p className="text-xs text-muted-foreground">Your answer: <span className="font-semibold">{studentAns}</span></p>
+                          {!correct && <p className="text-xs text-primary">Correct answer: <span className="font-semibold">{q.correct_answer}</span></p>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Fill in the Blank Section */}
+        {fillBlankQs.length > 0 && (
+          <Card>
+            <CardContent className="py-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <PenLine className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-heading font-bold">Fill in the Blank</h3>
+                <Badge variant="outline" className="ml-auto">{fillBlankScore.correct}/{fillBlankScore.total}</Badge>
+              </div>
+              <div className="space-y-3">
+                {fillBlankQs.map(q => {
+                  const correct = isCorrect(q);
+                  const studentAns = answers[q.id] || '—';
+                  return (
+                    <div key={q.id} className={`p-4 rounded-lg border ${correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
+                      <div className="flex items-start gap-2">
+                        {correct ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />}
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium">{q.question_text}</p>
+                          <p className="text-xs text-muted-foreground">Your answer: <span className="font-semibold">{studentAns}</span></p>
+                          {!correct && <p className="text-xs text-primary">Correct answer: <span className="font-semibold">{q.correct_answer}</span></p>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Listening Section */}
+        {listeningQs.length > 0 && (
+          <Card>
+            <CardContent className="py-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <Headphones className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-heading font-bold">Listening</h3>
+                <Badge variant="outline" className="ml-auto">{listeningScore.correct}/{listeningScore.total}</Badge>
+              </div>
+              <div className="space-y-3">
+                {listeningQs.map(q => {
+                  const correct = isCorrect(q);
+                  const studentAns = answers[q.id] || '—';
+                  return (
+                    <div key={q.id} className={`p-4 rounded-lg border ${correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
+                      <div className="flex items-start gap-2">
+                        {correct ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />}
+                        <div className="space-y-1 flex-1">
+                          <p className="text-sm font-medium">{q.question_text}</p>
+                          <p className="text-xs text-muted-foreground">Your answer: <span className="font-semibold">{studentAns}</span></p>
+                          {!correct && <p className="text-xs text-primary">Correct answer: <span className="font-semibold">{q.correct_answer}</span></p>}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Writing Section */}
+        {writingQs.length > 0 && (
+          <Card>
+            <CardContent className="py-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <PenLine className="w-5 h-5 text-primary" />
+                <h3 className="text-lg font-heading font-bold">Writing</h3>
+              </div>
+              {writingQs.map(q => {
+                const fb = writingFeedbacks[q.id];
+                const studentAns = answers[q.id] || '';
+                return (
+                  <div key={q.id} className="space-y-3 p-4 rounded-lg border border-border">
+                    <p className="text-sm font-medium">{q.question_text}</p>
+                    <div className="bg-muted/50 rounded p-3">
+                      <p className="text-xs text-muted-foreground mb-1 font-semibold">Your text:</p>
+                      <p className="text-sm whitespace-pre-wrap">{studentAns || <span className="italic text-muted-foreground">No answer provided</span>}</p>
+                    </div>
+
+                    {loadingFeedback && !fb ? (
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Grading your writing...
+                      </div>
+                    ) : fb ? (
+                      <div className="space-y-3">
+                        <div className="flex items-center gap-2">
+                          <Badge variant={fb.overall_score >= 7 ? 'default' : fb.overall_score >= 4 ? 'secondary' : 'destructive'}>
+                            Score: {fb.overall_score}/10
+                          </Badge>
+                        </div>
+                        <p className="text-sm">{fb.feedback}</p>
+
+                        {fb.spelling_errors?.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold text-destructive">Spelling Errors:</p>
+                            {fb.spelling_errors.map((e, i) => (
+                              <p key={i} className="text-xs text-muted-foreground">
+                                "<span className="text-destructive font-medium">{e.word}</span>" → <span className="text-primary font-medium">{e.correction}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+
+                        {fb.grammar_errors?.length > 0 && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-semibold text-destructive">Grammar Errors:</p>
+                            {fb.grammar_errors.map((e, i) => (
+                              <p key={i} className="text-xs text-muted-foreground">
+                                {e.error} → <span className="text-primary font-medium">{e.correction}</span>
+                              </p>
+                            ))}
+                          </div>
+                        )}
+
+                        {fb.topics_used?.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            <span className="text-xs font-semibold mr-1">Topics used:</span>
+                            {fb.topics_used.map((t, i) => (
+                              <Badge key={i} variant="outline" className="text-xs">{t}</Badge>
+                            ))}
+                          </div>
+                        )}
+                        {fb.topics_missing?.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            <span className="text-xs font-semibold text-destructive mr-1">Topics missing:</span>
+                            {fb.topics_missing.map((t, i) => (
+                              <Badge key={i} variant="destructive" className="text-xs">{t}</Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">Feedback not available yet. Check back later.</p>
+                    )}
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Speaking Notice */}
+        {speakingQs.length > 0 && (
+          <Card>
+            <CardContent className="py-6 space-y-3">
+              <div className="flex items-center gap-2">
+                <Mic className="w-5 h-5 text-muted-foreground" />
+                <h3 className="text-lg font-heading font-bold">Speaking</h3>
+              </div>
+              <div className="rounded-lg border-2 border-muted bg-muted/30 p-4 text-center">
+                <p className="text-sm text-muted-foreground">
+                  Speaking is evaluated by your teacher in person and is <strong>not included</strong> in the score above.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </div>
+  );
+}

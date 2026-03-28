@@ -1,0 +1,1 @@
+ALTER TABLE public.quizzes ADD COLUMN audio_speed numeric NOT NULL DEFAULT 0.9;

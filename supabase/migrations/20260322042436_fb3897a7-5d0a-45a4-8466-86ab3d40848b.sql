@@ -1,0 +1,1 @@
+ALTER TABLE public.quizzes ADD COLUMN num_questions integer NOT NULL DEFAULT 14;

@@ -1,0 +1,1 @@
+ALTER TABLE public.quizzes ADD COLUMN writing_word_limit integer NOT NULL DEFAULT 100;
