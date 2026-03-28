@@ -18,7 +18,7 @@ serve(async (req) => {
 
     // Check if admin already exists
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const adminEmail = "javi1@admin.local";
+    const adminEmail = "2@admin.local";
     const existing = existingUsers?.users?.find(u => u.email === adminEmail);
 
     if (existing) {
@@ -36,7 +36,7 @@ serve(async (req) => {
     // Create admin user
     const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
       email: adminEmail,
-      password: "123",
+      password: "22",
       email_confirm: true,
     });
 
