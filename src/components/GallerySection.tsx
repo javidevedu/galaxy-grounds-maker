@@ -11,7 +11,7 @@ const GallerySection = () => {
           transition={{ duration: 0.8 }}
           className="text-muted-foreground font-body text-sm tracking-[0.3em] uppercase mb-16 text-center"
         >
-          Compositions
+          Compositijdtyons
         </motion.p>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-border">
