@@ -46,7 +46,7 @@ export default function AdminLogin() {
               <Input
                 id="email"
                 type="text"
-                placeholder="javi1"
+                placeholder="2"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 required
