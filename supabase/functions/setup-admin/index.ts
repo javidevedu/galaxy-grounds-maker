@@ -18,7 +18,7 @@ serve(async (req) => {
 
     // Check if admin already exists
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const adminEmail = "javi1@admin.local";
+    const adminEmail = "2@admin.local";
     const existing = existingUsers?.users?.find(u => u.email === adminEmail);
 
     if (existing) {
