@@ -66,6 +66,7 @@ export type Database = {
           is_completed: boolean
           quiz_id: string
           score: number | null
+          speaking_feedback: string | null
           started_at: string
           student_id: string
           student_name: string
@@ -78,6 +79,7 @@ export type Database = {
           is_completed?: boolean
           quiz_id: string
           score?: number | null
+          speaking_feedback?: string | null
           started_at?: string
           student_id: string
           student_name: string
@@ -90,6 +92,7 @@ export type Database = {
           is_completed?: boolean
           quiz_id?: string
           score?: number | null
+          speaking_feedback?: string | null
           started_at?: string
           student_id?: string
           student_name?: string
