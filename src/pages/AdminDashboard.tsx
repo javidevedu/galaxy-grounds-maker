@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
