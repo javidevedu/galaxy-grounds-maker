@@ -152,8 +152,8 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => generateQuestions(quiz)} disabled={generating}>
-                    {generating ? <Loader2 className="animate-spin w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                  <Button variant="ghost" size="sm" onClick={() => generateQuestions(quiz)} disabled={generatingId !== null}>
+                    {generatingId === quiz.id ? <Loader2 className="animate-spin w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => navigate(`/LantestAI/admin/quiz/${quiz.id}`)}>
                     <Eye className="w-4 h-4" />
