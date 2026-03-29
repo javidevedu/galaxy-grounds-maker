@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   };
 
   const generateQuestions = async (quiz: Quiz) => {
-    setGenerating(true);
+    setGeneratingId(quiz.id);
     try {
       const res = await supabase.functions.invoke('generate-questions', {
         body: {
