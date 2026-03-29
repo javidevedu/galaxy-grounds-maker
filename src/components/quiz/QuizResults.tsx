@@ -2,9 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, BookOpen, Headphones, PenLine, Mic, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, PenLine, Mic, Loader2 } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
-import type { Json } from '@/integrations/supabase/types';
 
 type Question = Tables<'questions'>;
 
@@ -29,11 +28,8 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
   const [writingFeedbacks, setWritingFeedbacks] = useState<Record<string, WritingFeedback | null>>({});
   const [loadingFeedback, setLoadingFeedback] = useState(true);
 
-  const readingQs = questions.filter(q => q.type === 'multiple_choice');
-  const listeningQs = questions.filter(q => q.type === 'listening');
   const writingQs = questions.filter(q => q.type === 'writing');
   const speakingQs = questions.filter(q => q.type === 'speaking');
-  const fillBlankQs = questions.filter(q => q.type === 'fill_blank');
 
   // Poll for writing feedback
   useEffect(() => {
@@ -76,26 +72,12 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
     poll();
   }, [attemptId]);
 
-  const isCorrect = (q: Question) => {
-    const ans = answers[q.id] || '';
-    if (q.type === 'fill_blank') return ans.trim().toLowerCase() === q.correct_answer.trim().toLowerCase();
-    return ans === q.correct_answer;
-  };
-
-  const sectionScore = (qs: Question[]) => {
-    const correct = qs.filter(q => isCorrect(q)).length;
-    return { correct, total: qs.length };
-  };
-
-  const readingScore = sectionScore(readingQs);
-  const listeningScore = sectionScore(listeningQs);
-  const fillBlankScore = sectionScore(fillBlankQs);
   const percentage = scorableTotal > 0 ? Math.round((scorableCorrect / scorableTotal) * 100) : 0;
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-8">
       <div className="max-w-3xl mx-auto space-y-6">
-        {/* Overall Score */}
+        {/* Overall Score — no detail breakdown */}
         <Card>
           <CardContent className="py-8 text-center space-y-3">
             <CheckCircle2 className="w-14 h-14 mx-auto text-primary" />
@@ -104,110 +86,19 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
               {scorableCorrect}<span className="text-2xl text-muted-foreground">/{scorableTotal}</span>
             </div>
             <p className="text-muted-foreground">{percentage}% correct</p>
-            <p className="text-xs text-muted-foreground italic">Speaking is graded by your teacher and is not included in this score.</p>
+            <p className="text-xs text-muted-foreground italic">
+              Speaking is graded by your teacher. Detailed results for reading and listening will be shared by your teacher.
+            </p>
           </CardContent>
         </Card>
 
-        {/* Reading Section */}
-        {readingQs.length > 0 && (
-          <Card>
-            <CardContent className="py-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-heading font-bold">Reading</h3>
-                <Badge variant="outline" className="ml-auto">{readingScore.correct}/{readingScore.total}</Badge>
-              </div>
-              <div className="space-y-3">
-                {readingQs.map((q, i) => {
-                  const correct = isCorrect(q);
-                  const studentAns = answers[q.id] || '—';
-                  return (
-                    <div key={q.id} className={`p-4 rounded-lg border ${correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
-                      <div className="flex items-start gap-2">
-                        {correct ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />}
-                        <div className="space-y-1 flex-1">
-                          <p className="text-sm font-medium">{q.question_text}</p>
-                          <p className="text-xs text-muted-foreground">Your answer: <span className="font-semibold">{studentAns}</span></p>
-                          {!correct && <p className="text-xs text-primary">Correct answer: <span className="font-semibold">{q.correct_answer}</span></p>}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Fill in the Blank Section */}
-        {fillBlankQs.length > 0 && (
-          <Card>
-            <CardContent className="py-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <PenLine className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-heading font-bold">Fill in the Blank</h3>
-                <Badge variant="outline" className="ml-auto">{fillBlankScore.correct}/{fillBlankScore.total}</Badge>
-              </div>
-              <div className="space-y-3">
-                {fillBlankQs.map(q => {
-                  const correct = isCorrect(q);
-                  const studentAns = answers[q.id] || '—';
-                  return (
-                    <div key={q.id} className={`p-4 rounded-lg border ${correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
-                      <div className="flex items-start gap-2">
-                        {correct ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />}
-                        <div className="space-y-1 flex-1">
-                          <p className="text-sm font-medium">{q.question_text}</p>
-                          <p className="text-xs text-muted-foreground">Your answer: <span className="font-semibold">{studentAns}</span></p>
-                          {!correct && <p className="text-xs text-primary">Correct answer: <span className="font-semibold">{q.correct_answer}</span></p>}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Listening Section */}
-        {listeningQs.length > 0 && (
-          <Card>
-            <CardContent className="py-6 space-y-4">
-              <div className="flex items-center gap-2">
-                <Headphones className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-heading font-bold">Listening</h3>
-                <Badge variant="outline" className="ml-auto">{listeningScore.correct}/{listeningScore.total}</Badge>
-              </div>
-              <div className="space-y-3">
-                {listeningQs.map(q => {
-                  const correct = isCorrect(q);
-                  const studentAns = answers[q.id] || '—';
-                  return (
-                    <div key={q.id} className={`p-4 rounded-lg border ${correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
-                      <div className="flex items-start gap-2">
-                        {correct ? <CheckCircle2 className="w-5 h-5 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-5 h-5 text-destructive shrink-0 mt-0.5" />}
-                        <div className="space-y-1 flex-1">
-                          <p className="text-sm font-medium">{q.question_text}</p>
-                          <p className="text-xs text-muted-foreground">Your answer: <span className="font-semibold">{studentAns}</span></p>
-                          {!correct && <p className="text-xs text-primary">Correct answer: <span className="font-semibold">{q.correct_answer}</span></p>}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Writing Section */}
+        {/* Writing Section — only feedback, no correct answers */}
         {writingQs.length > 0 && (
           <Card>
             <CardContent className="py-6 space-y-4">
               <div className="flex items-center gap-2">
                 <PenLine className="w-5 h-5 text-primary" />
-                <h3 className="text-lg font-heading font-bold">Writing</h3>
+                <h3 className="text-lg font-heading font-bold">Writing Feedback</h3>
               </div>
               {writingQs.map(q => {
                 const fb = writingFeedbacks[q.id];

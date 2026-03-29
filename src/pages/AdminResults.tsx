@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Download, Loader2, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Download, Loader2, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle, BookOpen, Headphones, PenLine, Mic, Save } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AttemptWithQuiz {
@@ -19,6 +20,7 @@ interface AttemptWithQuiz {
   finished_at: string | null;
   warnings: number;
   is_completed: boolean;
+  speaking_feedback: string | null;
   quizzes: { title: string } | null;
 }
 
@@ -37,7 +39,7 @@ interface AnswerWithFeedback {
   student_answer: string | null;
   is_correct: boolean | null;
   writing_feedback: WritingFeedback | null;
-  questions: { type: string; question_text: string; correct_answer: string } | null;
+  questions: { type: string; question_text: string; correct_answer: string; option_a: string | null; option_b: string | null; option_c: string | null; option_d: string | null } | null;
 }
 
 export default function AdminResults() {
@@ -47,6 +49,8 @@ export default function AdminResults() {
   const [loading, setLoading] = useState(true);
   const [expandedAttempt, setExpandedAttempt] = useState<string | null>(null);
   const [attemptAnswers, setAttemptAnswers] = useState<Record<string, AnswerWithFeedback[]>>({});
+  const [speakingNotes, setSpeakingNotes] = useState<Record<string, string>>({});
+  const [savingSpeaking, setSavingSpeaking] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) navigate('/LantestAI/admin/login');
@@ -61,7 +65,14 @@ export default function AdminResults() {
       .from('attempts')
       .select('*, quizzes(title)')
       .order('started_at', { ascending: false });
-    if (data) setAttempts(data as AttemptWithQuiz[]);
+    if (data) {
+      setAttempts(data as unknown as AttemptWithQuiz[]);
+      const notes: Record<string, string> = {};
+      for (const a of data as unknown as AttemptWithQuiz[]) {
+        notes[a.id] = a.speaking_feedback || '';
+      }
+      setSpeakingNotes(notes);
+    }
     setLoading(false);
   };
 
@@ -74,11 +85,24 @@ export default function AdminResults() {
     if (!attemptAnswers[attemptId]) {
       const { data } = await supabase
         .from('answers')
-        .select('*, questions(type, question_text, correct_answer)')
+        .select('*, questions(type, question_text, correct_answer, option_a, option_b, option_c, option_d)')
         .eq('attempt_id', attemptId);
       if (data) {
         setAttemptAnswers(prev => ({ ...prev, [attemptId]: data as unknown as AnswerWithFeedback[] }));
       }
+    }
+  };
+
+  const saveSpeakingFeedback = async (attemptId: string) => {
+    setSavingSpeaking(prev => ({ ...prev, [attemptId]: true }));
+    const { error } = await supabase.from('attempts').update({
+      speaking_feedback: speakingNotes[attemptId] || null,
+    }).eq('id', attemptId);
+    setSavingSpeaking(prev => ({ ...prev, [attemptId]: false }));
+    if (error) {
+      toast.error('Error saving speaking feedback');
+    } else {
+      toast.success('Speaking feedback saved!');
     }
   };
 
@@ -161,7 +185,14 @@ export default function AdminResults() {
                     {expandedAttempt === a.id && (
                       <TableRow key={`${a.id}-detail`}>
                         <TableCell colSpan={8} className="bg-muted/30 p-4">
-                          <WritingDetails answers={attemptAnswers[a.id] || []} />
+                          <AttemptDetail
+                            answers={attemptAnswers[a.id] || []}
+                            attemptId={a.id}
+                            speakingNote={speakingNotes[a.id] || ''}
+                            onSpeakingNoteChange={(val) => setSpeakingNotes(prev => ({ ...prev, [a.id]: val }))}
+                            onSaveSpeaking={() => saveSpeakingFeedback(a.id)}
+                            savingSpeaking={savingSpeaking[a.id] || false}
+                          />
                         </TableCell>
                       </TableRow>
                     )}
@@ -183,102 +214,230 @@ export default function AdminResults() {
   );
 }
 
-function WritingDetails({ answers }: { answers: AnswerWithFeedback[] }) {
+function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange, onSaveSpeaking, savingSpeaking }: {
+  answers: AnswerWithFeedback[];
+  attemptId: string;
+  speakingNote: string;
+  onSpeakingNoteChange: (val: string) => void;
+  onSaveSpeaking: () => void;
+  savingSpeaking: boolean;
+}) {
+  const readingAnswers = answers.filter(a => a.questions?.type === 'multiple_choice');
+  const listeningAnswers = answers.filter(a => a.questions?.type === 'listening');
+  const fillBlankAnswers = answers.filter(a => a.questions?.type === 'fill_blank');
   const writingAnswers = answers.filter(a => a.questions?.type === 'writing');
+  const speakingAnswers = answers.filter(a => a.questions?.type === 'speaking');
 
-  if (writingAnswers.length === 0) {
-    return <p className="text-sm text-muted-foreground">No writing questions in this attempt.</p>;
+  const getOptionText = (q: AnswerWithFeedback['questions'], letter: string) => {
+    if (!q) return '';
+    const key = `option_${letter.toLowerCase()}` as keyof typeof q;
+    return (q[key] as string) || '';
+  };
+
+  const getCorrectOptionText = (a: AnswerWithFeedback) => {
+    if (!a.questions) return a.questions?.correct_answer || '';
+    const letter = a.questions.correct_answer;
+    const text = getOptionText(a.questions, letter);
+    return text ? `${letter}) ${text}` : letter;
+  };
+
+  const getStudentOptionText = (a: AnswerWithFeedback) => {
+    if (!a.questions || !a.student_answer) return a.student_answer || '—';
+    const letter = a.student_answer;
+    const text = getOptionText(a.questions, letter);
+    return text ? `${letter}) ${text}` : letter;
+  };
+
+  if (answers.length === 0) {
+    return <p className="text-sm text-muted-foreground">Loading answers...</p>;
   }
 
   return (
     <div className="space-y-6">
-      {writingAnswers.map((a, i) => {
-        const fb = a.writing_feedback;
-        return (
-          <div key={a.id} className="space-y-3">
-            <h4 className="font-heading font-bold text-sm">Writing Question {i + 1}</h4>
-            <p className="text-sm text-muted-foreground">{a.questions?.question_text}</p>
+      {/* Reading */}
+      {readingAnswers.length > 0 && (
+        <QuestionSection
+          icon={<BookOpen className="w-4 h-4 text-primary" />}
+          title="Reading"
+          answers={readingAnswers}
+          getStudentText={getStudentOptionText}
+          getCorrectText={getCorrectOptionText}
+        />
+      )}
 
-            <div className="bg-card rounded-lg p-3 border">
-              <p className="text-xs font-medium text-muted-foreground mb-1">Student's Answer:</p>
-              <p className="text-sm whitespace-pre-wrap">{a.student_answer || '(empty)'}</p>
-            </div>
+      {/* Fill in the Blank */}
+      {fillBlankAnswers.length > 0 && (
+        <QuestionSection
+          icon={<PenLine className="w-4 h-4 text-primary" />}
+          title="Fill in the Blank"
+          answers={fillBlankAnswers}
+          getStudentText={(a) => a.student_answer || '—'}
+          getCorrectText={(a) => a.questions?.correct_answer || ''}
+        />
+      )}
 
-            {!fb && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                AI grading in progress...
-              </div>
-            )}
+      {/* Listening */}
+      {listeningAnswers.length > 0 && (
+        <QuestionSection
+          icon={<Headphones className="w-4 h-4 text-primary" />}
+          title="Listening"
+          answers={listeningAnswers}
+          getStudentText={getStudentOptionText}
+          getCorrectText={getCorrectOptionText}
+        />
+      )}
 
-            {fb && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-3">
-                  <Badge variant={fb.overall_score >= 7 ? 'default' : fb.overall_score >= 4 ? 'secondary' : 'destructive'}>
-                    Score: {fb.overall_score}/10
-                  </Badge>
-                </div>
-
-                <p className="text-sm">{fb.feedback}</p>
-
-                {fb.spelling_errors.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-destructive flex items-center gap-1">
-                      <XCircle className="w-3 h-3" /> Spelling Errors ({fb.spelling_errors.length})
-                    </p>
-                    {fb.spelling_errors.map((err, j) => (
-                      <div key={j} className="text-xs bg-destructive/5 rounded p-2">
-                        <span className="line-through text-destructive">{err.word}</span>
-                        {' → '}
-                        <span className="font-medium text-foreground">{err.correction}</span>
-                        <span className="text-muted-foreground ml-2">({err.context})</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {fb.grammar_errors.length > 0 && (
-                  <div className="space-y-1">
-                    <p className="text-xs font-medium text-warning flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> Grammar Errors ({fb.grammar_errors.length})
-                    </p>
-                    {fb.grammar_errors.map((err, j) => (
-                      <div key={j} className="text-xs bg-warning/5 rounded p-2">
-                        <span className="text-foreground">{err.error}</span>
-                        {' → '}
-                        <span className="font-medium">{err.correction}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <div className="flex gap-4">
-                  {fb.topics_used.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                        <CheckCircle2 className="w-3 h-3 text-green-600" /> Topics Used
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {fb.topics_used.map(t => <Badge key={t} variant="secondary" className="text-xs">{t}</Badge>)}
-                      </div>
-                    </div>
-                  )}
-                  {fb.topics_missing.length > 0 && (
-                    <div>
-                      <p className="text-xs font-medium flex items-center gap-1 mb-1">
-                        <XCircle className="w-3 h-3 text-destructive" /> Topics Missing
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {fb.topics_missing.map(t => <Badge key={t} variant="destructive" className="text-xs">{t}</Badge>)}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+      {/* Writing */}
+      {writingAnswers.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <PenLine className="w-4 h-4 text-primary" />
+            <h4 className="font-heading font-bold text-sm">Writing</h4>
           </div>
-        );
-      })}
+          {writingAnswers.map((a, i) => {
+            const fb = a.writing_feedback;
+            return (
+              <div key={a.id} className="space-y-3 mb-4">
+                <p className="text-sm text-muted-foreground">{a.questions?.question_text}</p>
+                <div className="bg-card rounded-lg p-3 border">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">Student's Answer:</p>
+                  <p className="text-sm whitespace-pre-wrap">{a.student_answer || '(empty)'}</p>
+                </div>
+
+                {!fb && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    AI grading in progress...
+                  </div>
+                )}
+
+                {fb && (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Badge variant={fb.overall_score >= 7 ? 'default' : fb.overall_score >= 4 ? 'secondary' : 'destructive'}>
+                        Score: {fb.overall_score}/10
+                      </Badge>
+                    </div>
+                    <p className="text-sm">{fb.feedback}</p>
+
+                    {fb.spelling_errors?.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-destructive flex items-center gap-1">
+                          <XCircle className="w-3 h-3" /> Spelling Errors ({fb.spelling_errors.length})
+                        </p>
+                        {fb.spelling_errors.map((err, j) => (
+                          <div key={j} className="text-xs bg-destructive/5 rounded p-2">
+                            <span className="line-through text-destructive">{err.word}</span>
+                            {' → '}
+                            <span className="font-medium text-foreground">{err.correction}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {fb.grammar_errors?.length > 0 && (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium flex items-center gap-1">
+                          <AlertCircle className="w-3 h-3" /> Grammar Errors ({fb.grammar_errors.length})
+                        </p>
+                        {fb.grammar_errors.map((err, j) => (
+                          <div key={j} className="text-xs bg-muted rounded p-2">
+                            <span className="text-foreground">{err.error}</span>
+                            {' → '}
+                            <span className="font-medium">{err.correction}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="flex gap-4">
+                      {fb.topics_used?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium flex items-center gap-1 mb-1">
+                            <CheckCircle2 className="w-3 h-3 text-green-600" /> Topics Used
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {fb.topics_used.map(t => <Badge key={t} variant="secondary" className="text-xs">{t}</Badge>)}
+                          </div>
+                        </div>
+                      )}
+                      {fb.topics_missing?.length > 0 && (
+                        <div>
+                          <p className="text-xs font-medium flex items-center gap-1 mb-1">
+                            <XCircle className="w-3 h-3 text-destructive" /> Topics Missing
+                          </p>
+                          <div className="flex flex-wrap gap-1">
+                            {fb.topics_missing.map(t => <Badge key={t} variant="destructive" className="text-xs">{t}</Badge>)}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Speaking — teacher feedback area */}
+      {(speakingAnswers.length > 0 || true) && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <Mic className="w-4 h-4 text-muted-foreground" />
+            <h4 className="font-heading font-bold text-sm">Speaking Feedback</h4>
+          </div>
+          <div className="space-y-3">
+            <Textarea
+              value={speakingNote}
+              onChange={(e) => onSpeakingNoteChange(e.target.value)}
+              placeholder="Write speaking feedback for this student... e.g. 'Good pronunciation overall, needs to improve intonation on questions. Words to practice: thought, through, although.'"
+              className="min-h-[100px] text-sm"
+              rows={4}
+            />
+            <Button size="sm" onClick={onSaveSpeaking} disabled={savingSpeaking}>
+              {savingSpeaking ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Save className="w-4 h-4 mr-1" />}
+              Save Speaking Feedback
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function QuestionSection({ icon, title, answers, getStudentText, getCorrectText }: {
+  icon: React.ReactNode;
+  title: string;
+  answers: AnswerWithFeedback[];
+  getStudentText: (a: AnswerWithFeedback) => string;
+  getCorrectText: (a: AnswerWithFeedback) => string;
+}) {
+  const correct = answers.filter(a => a.is_correct).length;
+
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        {icon}
+        <h4 className="font-heading font-bold text-sm">{title}</h4>
+        <Badge variant="outline" className="ml-auto text-xs">{correct}/{answers.length}</Badge>
+      </div>
+      <div className="space-y-2">
+        {answers.map((a, i) => (
+          <div key={a.id} className={`p-3 rounded-lg border text-sm ${a.is_correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
+            <div className="flex items-start gap-2">
+              {a.is_correct ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />}
+              <div className="space-y-1 flex-1">
+                <p className="text-xs font-medium">{a.questions?.question_text}</p>
+                <p className="text-xs text-muted-foreground">Student: <span className="font-semibold">{getStudentText(a)}</span></p>
+                {!a.is_correct && (
+                  <p className="text-xs text-primary">Correct: <span className="font-semibold">{getCorrectText(a)}</span></p>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
