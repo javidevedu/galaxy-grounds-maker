@@ -80,7 +80,7 @@ export default function AdminDashboard() {
       toast.error('Error generating questions');
       console.error(e);
     }
-    setGenerating(false);
+    setGeneratingId(null);
   };
 
   const publishQuiz = async (quiz: Quiz) => {
