@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,7 +7,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Download, Loader2, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle, BookOpen, Headphones, PenLine, Mic, Save } from 'lucide-react';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ArrowLeft, Download, Loader2, ChevronDown, ChevronUp, AlertCircle, CheckCircle2, XCircle, BookOpen, Headphones, PenLine, Mic, Save, FileText } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AttemptWithQuiz {
@@ -21,6 +22,7 @@ interface AttemptWithQuiz {
   warnings: number;
   is_completed: boolean;
   speaking_feedback: string | null;
+  quiz_id: string;
   quizzes: { title: string } | null;
 }
 
@@ -76,6 +78,19 @@ export default function AdminResults() {
     setLoading(false);
   };
 
+  // Group attempts by quiz
+  const groupedByQuiz = useMemo(() => {
+    const groups: Record<string, { title: string; attempts: AttemptWithQuiz[] }> = {};
+    for (const a of attempts) {
+      const key = a.quiz_id;
+      if (!groups[key]) {
+        groups[key] = { title: a.quizzes?.title || 'Unknown Quiz', attempts: [] };
+      }
+      groups[key].attempts.push(a);
+    }
+    return Object.entries(groups);
+  }, [attempts]);
+
   const toggleExpand = async (attemptId: string) => {
     if (expandedAttempt === attemptId) {
       setExpandedAttempt(null);
@@ -113,10 +128,10 @@ export default function AdminResults() {
     ).join('\n');
     const blob = new Blob([headers + rows], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'results.csv';
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'results.csv';
+    link.click();
     toast.success('CSV exported!');
   };
 
@@ -138,77 +153,89 @@ export default function AdminResults() {
         </div>
       </header>
 
-      <main className="container mx-auto px-4 py-8 max-w-5xl">
-        <Card className="glass-card">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Quiz</TableHead>
-                  <TableHead>Score</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Warnings</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {attempts.map(a => (
-                  <>
-                    <TableRow key={a.id} className="cursor-pointer" onClick={() => toggleExpand(a.id)}>
-                      <TableCell className="font-medium">{a.student_name}</TableCell>
-                      <TableCell>{a.student_id}</TableCell>
-                      <TableCell>{a.quizzes?.title || '-'}</TableCell>
-                      <TableCell>
-                        <span className="font-heading font-bold">{a.score || 0}</span>
-                        <span className="text-muted-foreground">/{a.total_questions || 0}</span>
-                      </TableCell>
-                      <TableCell>{new Date(a.started_at).toLocaleDateString()}</TableCell>
-                      <TableCell>
-                        {a.warnings > 0 ? (
-                          <Badge variant="destructive">{a.warnings}</Badge>
-                        ) : (
-                          <Badge variant="secondary">0</Badge>
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={a.is_completed ? 'default' : 'destructive'}>
-                          {a.is_completed ? 'Completed' : 'Closed'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {expandedAttempt === a.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </TableCell>
-                    </TableRow>
-                    {expandedAttempt === a.id && (
-                      <TableRow key={`${a.id}-detail`}>
-                        <TableCell colSpan={8} className="bg-muted/30 p-4">
-                          <AttemptDetail
-                            answers={attemptAnswers[a.id] || []}
-                            attemptId={a.id}
-                            speakingNote={speakingNotes[a.id] || ''}
-                            onSpeakingNoteChange={(val) => setSpeakingNotes(prev => ({ ...prev, [a.id]: val }))}
-                            onSaveSpeaking={() => saveSpeakingFeedback(a.id)}
-                            savingSpeaking={savingSpeaking[a.id] || false}
-                          />
-                        </TableCell>
+      <main className="container mx-auto px-4 py-8 max-w-5xl space-y-4">
+        {groupedByQuiz.length === 0 ? (
+          <Card className="glass-card">
+            <CardContent className="py-8 text-center text-muted-foreground">
+              No results yet
+            </CardContent>
+          </Card>
+        ) : (
+          <Accordion type="multiple" className="space-y-4">
+            {groupedByQuiz.map(([quizId, group]) => (
+              <AccordionItem key={quizId} value={quizId} className="border rounded-lg overflow-hidden bg-card">
+                <AccordionTrigger className="px-4 py-3 hover:no-underline">
+                  <div className="flex items-center gap-3 text-left">
+                    <FileText className="w-5 h-5 text-primary shrink-0" />
+                    <div>
+                      <p className="font-heading font-bold text-sm">{group.title}</p>
+                      <p className="text-xs text-muted-foreground">{group.attempts.length} attempt{group.attempts.length !== 1 ? 's' : ''}</p>
+                    </div>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-0 pb-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Score</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Warnings</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead></TableHead>
                       </TableRow>
-                    )}
-                  </>
-                ))}
-                {attempts.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
-                      No results yet
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+                    </TableHeader>
+                    <TableBody>
+                      {group.attempts.map(a => (
+                        <>
+                          <TableRow key={a.id} className="cursor-pointer" onClick={() => toggleExpand(a.id)}>
+                            <TableCell className="font-medium">{a.student_name}</TableCell>
+                            <TableCell>{a.student_id}</TableCell>
+                            <TableCell>
+                              <span className="font-heading font-bold">{a.score || 0}</span>
+                              <span className="text-muted-foreground">/{a.total_questions || 0}</span>
+                            </TableCell>
+                            <TableCell>{new Date(a.started_at).toLocaleDateString()}</TableCell>
+                            <TableCell>
+                              {a.warnings > 0 ? (
+                                <Badge variant="destructive">{a.warnings}</Badge>
+                              ) : (
+                                <Badge variant="secondary">0</Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Badge variant={a.is_completed ? 'default' : 'destructive'}>
+                                {a.is_completed ? 'Completed' : 'Closed'}
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {expandedAttempt === a.id ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                            </TableCell>
+                          </TableRow>
+                          {expandedAttempt === a.id && (
+                            <TableRow key={`${a.id}-detail`}>
+                              <TableCell colSpan={7} className="bg-muted/30 p-4">
+                                <AttemptDetail
+                                  answers={attemptAnswers[a.id] || []}
+                                  attemptId={a.id}
+                                  speakingNote={speakingNotes[a.id] || ''}
+                                  onSpeakingNoteChange={(val) => setSpeakingNotes(prev => ({ ...prev, [a.id]: val }))}
+                                  onSaveSpeaking={() => saveSpeakingFeedback(a.id)}
+                                  savingSpeaking={savingSpeaking[a.id] || false}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        )}
       </main>
     </div>
   );
@@ -254,7 +281,6 @@ function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange,
 
   return (
     <div className="space-y-6">
-      {/* Reading */}
       {readingAnswers.length > 0 && (
         <QuestionSection
           icon={<BookOpen className="w-4 h-4 text-primary" />}
@@ -265,7 +291,6 @@ function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange,
         />
       )}
 
-      {/* Fill in the Blank */}
       {fillBlankAnswers.length > 0 && (
         <QuestionSection
           icon={<PenLine className="w-4 h-4 text-primary" />}
@@ -276,7 +301,6 @@ function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange,
         />
       )}
 
-      {/* Listening */}
       {listeningAnswers.length > 0 && (
         <QuestionSection
           icon={<Headphones className="w-4 h-4 text-primary" />}
@@ -287,14 +311,13 @@ function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange,
         />
       )}
 
-      {/* Writing */}
       {writingAnswers.length > 0 && (
         <div>
           <div className="flex items-center gap-2 mb-3">
             <PenLine className="w-4 h-4 text-primary" />
             <h4 className="font-heading font-bold text-sm">Writing</h4>
           </div>
-          {writingAnswers.map((a, i) => {
+          {writingAnswers.map((a) => {
             const fb = a.writing_feedback;
             return (
               <div key={a.id} className="space-y-3 mb-4">
@@ -380,7 +403,6 @@ function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange,
         </div>
       )}
 
-      {/* Speaking — teacher feedback area */}
       {(speakingAnswers.length > 0 || true) && (
         <div>
           <div className="flex items-center gap-2 mb-3">
@@ -391,7 +413,7 @@ function AttemptDetail({ answers, attemptId, speakingNote, onSpeakingNoteChange,
             <Textarea
               value={speakingNote}
               onChange={(e) => onSpeakingNoteChange(e.target.value)}
-              placeholder="Write speaking feedback for this student... e.g. 'Good pronunciation overall, needs to improve intonation on questions. Words to practice: thought, through, although.'"
+              placeholder="Write speaking feedback for this student..."
               className="min-h-[100px] text-sm"
               rows={4}
             />
@@ -423,7 +445,7 @@ function QuestionSection({ icon, title, answers, getStudentText, getCorrectText 
         <Badge variant="outline" className="ml-auto text-xs">{correct}/{answers.length}</Badge>
       </div>
       <div className="space-y-2">
-        {answers.map((a, i) => (
+        {answers.map((a) => (
           <div key={a.id} className={`p-3 rounded-lg border text-sm ${a.is_correct ? 'border-primary/30 bg-primary/5' : 'border-destructive/30 bg-destructive/5'}`}>
             <div className="flex items-start gap-2">
               {a.is_correct ? <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" /> : <XCircle className="w-4 h-4 text-destructive shrink-0 mt-0.5" />}
