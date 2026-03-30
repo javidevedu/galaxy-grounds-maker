@@ -121,7 +121,7 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
                     {loadingFeedback && !fb ? (
                       <div className="flex items-center gap-2 text-sm text-muted-foreground">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        Grading your writing...
+                        Grading your writing... This may take up to 2 minutes.
                       </div>
                     ) : fb ? (
                       <div className="space-y-3">
