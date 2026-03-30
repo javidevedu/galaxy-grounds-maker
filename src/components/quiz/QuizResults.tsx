@@ -39,37 +39,44 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
     }
 
     let attempts = 0;
-    const maxAttempts = 20;
+    const maxAttempts = 40; // ~2 minutes total
+    let cancelled = false;
 
     const poll = async () => {
-      const { data } = await supabase
-        .from('answers')
-        .select('question_id, writing_feedback')
-        .eq('attempt_id', attemptId)
-        .in('question_id', writingQs.map(q => q.id));
+      if (cancelled) return;
+      try {
+        const { data } = await supabase
+          .from('answers')
+          .select('question_id, writing_feedback')
+          .eq('attempt_id', attemptId)
+          .in('question_id', writingQs.map(q => q.id));
 
-      if (data) {
-        const feedbacks: Record<string, WritingFeedback | null> = {};
-        let allDone = true;
-        for (const row of data) {
-          if (row.writing_feedback) {
-            feedbacks[row.question_id] = row.writing_feedback as unknown as WritingFeedback;
-          } else {
-            allDone = false;
-            feedbacks[row.question_id] = null;
+        if (data) {
+          const feedbacks: Record<string, WritingFeedback | null> = {};
+          let allDone = true;
+          for (const row of data) {
+            if (row.writing_feedback) {
+              feedbacks[row.question_id] = row.writing_feedback as unknown as WritingFeedback;
+            } else {
+              allDone = false;
+              feedbacks[row.question_id] = null;
+            }
+          }
+          setWritingFeedbacks(feedbacks);
+          if (allDone || attempts >= maxAttempts) {
+            setLoadingFeedback(false);
+            return;
           }
         }
-        setWritingFeedbacks(feedbacks);
-        if (allDone || attempts >= maxAttempts) {
-          setLoadingFeedback(false);
-          return;
-        }
+      } catch (err) {
+        console.error('Polling error:', err);
       }
       attempts++;
-      setTimeout(poll, 3000);
+      if (!cancelled) setTimeout(poll, 3000);
     };
 
     poll();
+    return () => { cancelled = true; };
   }, [attemptId]);
 
   const percentage = scorableTotal > 0 ? Math.round((scorableCorrect / scorableTotal) * 100) : 0;
