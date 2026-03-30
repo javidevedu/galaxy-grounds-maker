@@ -172,7 +172,7 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
                         )}
                       </div>
                     ) : (
-                      <p className="text-xs text-muted-foreground italic">Feedback not available yet. Check back later.</p>
+                      <p className="text-xs text-muted-foreground italic">Feedback could not be generated. Your teacher will review your writing manually.</p>
                     )}
                   </div>
                 );
