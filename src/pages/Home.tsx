@@ -267,7 +267,7 @@ export default function Home() {
                   title: 'Backend Development: Online Book Review Application',
                   desc: 'Book reviews, ratings, and secure user access.',
                   href: '/projects/book-review',
-                  image: '/covers/book-review.png',
+                  image: '/images/cover.png',
                 },
                 {
                   title: 'Frontend & Backend Development: Travel Recommendation Web',
