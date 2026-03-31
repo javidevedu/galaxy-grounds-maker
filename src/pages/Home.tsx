@@ -265,27 +265,27 @@ export default function Home() {
                 {
                   title: 'Backend Development: Online Book Review Application',
                   desc: 'A comprehensive book review platform with user authentication and rating system',
-                  href: 'https://jatest.vercel.app/projects/book-review/index.html',
+                  href: '/projects/book-review',
                 },
                 {
                   title: 'Frontend & Backend Development: Travel Recommendation Web',
                   desc: 'Dynamic search functionality for travel destinations with real-time recommendations',
-                  href: 'https://jatest.vercel.app/projects/travel-recommendation/index.html',
+                  href: '/projects/travel-recommendation',
                 },
                 {
                   title: 'Frontend Development javidev.site',
                   desc: 'UX/UI coding & design - Modern portfolio website',
-                  href: 'https://jatest.vercel.app/projects/javidev-site/index.html',
+                  href: '/projects/javidev-site',
                 },
                 {
                   title: 'E-commerce Web Development – WhatToBuy',
                   desc: 'Full-featured e-commerce platform with WooCommerce integration',
-                  href: 'https://jatest.vercel.app/projects/whattobuy/index.html',
+                  href: '/projects/whattobuy',
                 },
                 {
                   title: 'Creative Agency Web Design – JV Luxe Marketing',
                   desc: 'Elegant marketing agency website with custom WordPress theme',
-                  href: 'https://jatest.vercel.app/projects/jv-luxe/index.html',
+                  href: '/projects/jv-luxe',
                 },
               ].map((proj, i) => (
                 <a
