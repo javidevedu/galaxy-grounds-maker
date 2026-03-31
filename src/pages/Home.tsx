@@ -262,27 +262,53 @@ export default function Home() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
               {[
-                { title: 'Backend Development: Online Book Review Application', desc: 'A comprehensive book review platform with user authentication and rating system' },
-                { title: 'Frontend & Backend Development: Travel Recommendation Web', desc: 'Dynamic search functionality for travel destinations with real-time recommendations' },
-                { title: 'Frontend Development javidev.site', desc: 'UX/UI coding & design - Modern portfolio website' },
-                { title: 'E-commerce Web Development – WhatToBuy', desc: 'Full-featured e-commerce platform with WooCommerce integration' },
-                { title: 'Creative Agency Web Design – JV Luxe Marketing', desc: 'Elegant marketing agency website with custom WordPress theme' },
+                {
+                  title: 'Backend Development: Online Book Review Application',
+                  desc: 'A comprehensive book review platform with user authentication and rating system',
+                  href: '/projects/book-review/',
+                },
+                {
+                  title: 'Frontend & Backend Development: Travel Recommendation Web',
+                  desc: 'Dynamic search functionality for travel destinations with real-time recommendations',
+                  href: '/projects/travel-recommendation/',
+                },
+                {
+                  title: 'Frontend Development javidev.site',
+                  desc: 'UX/UI coding & design - Modern portfolio website',
+                  href: '/projects/javidev-site/',
+                },
+                {
+                  title: 'E-commerce Web Development – WhatToBuy',
+                  desc: 'Full-featured e-commerce platform with WooCommerce integration',
+                  href: '/projects/whattobuy/',
+                },
+                {
+                  title: 'Creative Agency Web Design – JV Luxe Marketing',
+                  desc: 'Elegant marketing agency website with custom WordPress theme',
+                  href: '/projects/jv-luxe/',
+                },
               ].map((proj, i) => (
-                <div key={i} style={{
-                  background: 'var(--bg-secondary)', borderRadius: 16, overflow: 'hidden',
-                  border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)',
-                  transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer'
-                }} className="project-card-home">
-                  <div style={{ width: '100%', height: 180, background: 'var(--hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <i className="fas fa-code" style={{ fontSize: '2rem', color: 'var(--text-tertiary)' }} />
+                <a
+                  key={i}
+                  href={proj.href}
+                  style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
+                >
+                  <div style={{
+                    background: 'var(--bg-secondary)', borderRadius: 16, overflow: 'hidden',
+                    border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)',
+                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer'
+                  }} className="project-card-home">
+                    <div style={{ width: '100%', height: 180, background: 'var(--hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <i className="fas fa-code" style={{ fontSize: '2rem', color: 'var(--text-tertiary)' }} />
+                    </div>
+                    <div style={{ padding: '1.25rem' }}>
+                      <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+                        {proj.title}
+                      </h3>
+                      <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{proj.desc}</p>
+                    </div>
                   </div>
-                  <div style={{ padding: '1.25rem' }}>
-                    <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-                      {proj.title}
-                    </h3>
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{proj.desc}</p>
-                  </div>
-                </div>
+                </a>
               ))}
             </div>
           </section>
