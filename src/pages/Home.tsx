@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import bookReviewImg from './projects/book-review/images/cover.png';
 import travelRecommendationImg from './projects/travel-recommendation/images/cover.png';
-import javidevSiteImg from './projects/javidev-site/images/Screenshot-2024-12-31-175150.png';
-import whatToBuyImg from './projects/whattobuy/images/landin-w2b.png';
-import jvLuxeImg from './projects/jv-luxe/images/Screenshot-2024-11-23-161043-768x367.png';
+import javidevSiteImg from './projects/javidev-site/images/cover.png';
+import whatToBuyImg from './projects/whattobuy/images/cover.png';
+import jvLuxeImg from './projects/jv-luxe/images/cover.png';
 
 const appsCreated = [
   {
