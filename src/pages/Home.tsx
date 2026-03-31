@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 
 const appsCreated = [
   {
@@ -264,7 +265,7 @@ export default function Home() {
               {[
                 {
                   title: 'Backend Development: Online Book Review Application',
-                  desc: 'aaA comprehensive book review platform with user authentication and rating system',
+                  desc: 'A comprehensive book review platform with user authentication and rating system',
                   href: '/projects/book-review',
                 },
                 {
@@ -288,9 +289,9 @@ export default function Home() {
                   href: '/projects/jv-luxe',
                 },
               ].map((proj, i) => (
-                <a
+                <Link
                   key={i}
-                  href={proj.href}
+                  to={proj.href}
                   style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}
                 >
                   <div style={{
@@ -308,7 +309,7 @@ export default function Home() {
                       <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', lineHeight: 1.6 }}>{proj.desc}</p>
                     </div>
                   </div>
-                </a>
+                </Link>
               ))}
             </div>
           </section>
