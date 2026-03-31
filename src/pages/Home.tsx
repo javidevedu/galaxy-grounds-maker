@@ -264,7 +264,7 @@ export default function Home() {
               {[
                 {
                   title: 'Backend Development: Online Book Review Application',
-                  desc: 'A comprehensive book review platform with user authentication and rating system',
+                  desc: 'aaA comprehensive book review platform with user authentication and rating system',
                   href: '/projects/book-review',
                 },
                 {
