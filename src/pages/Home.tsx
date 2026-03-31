@@ -265,27 +265,27 @@ export default function Home() {
                 {
                   title: 'Backend Development: Online Book Review Application',
                   desc: 'A comprehensive book review platform with user authentication and rating system',
-                  href: '/projects/book-review/',
+                  href: '/projects/book-review/index.html',
                 },
                 {
                   title: 'Frontend & Backend Development: Travel Recommendation Web',
                   desc: 'Dynamic search functionality for travel destinations with real-time recommendations',
-                  href: '/projects/travel-recommendation/',
+                  href: '/projects/travel-recommendation/index.html',
                 },
                 {
                   title: 'Frontend Development javidev.site',
                   desc: 'UX/UI coding & design - Modern portfolio website',
-                  href: '/projects/javidev-site/',
+                  href: '/projects/javidev-site/index.html',
                 },
                 {
                   title: 'E-commerce Web Development – WhatToBuy',
                   desc: 'Full-featured e-commerce platform with WooCommerce integration',
-                  href: '/projects/whattobuy/',
+                  href: '/projects/whattobuy/index.html',
                 },
                 {
                   title: 'Creative Agency Web Design – JV Luxe Marketing',
                   desc: 'Elegant marketing agency website with custom WordPress theme',
-                  href: '/projects/jv-luxe/',
+                  href: '/projects/jv-luxe/index.html',
                 },
               ].map((proj, i) => (
                 <a
