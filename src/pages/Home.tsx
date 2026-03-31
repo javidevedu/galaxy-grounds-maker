@@ -1,10 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import bookReviewImg from './projects/book-review/images/cover.png';
-import travelRecommendationImg from './projects/travel-recommendation/images/cover.png';
-import javidevSiteImg from './projects/javidev-site/images/cover.png';
-import whatToBuyImg from './projects/whattobuy/images/cover.png';
-import jvLuxeImg from './projects/jv-luxe/images/cover.png';
 
 const appsCreated = [
   {
@@ -272,31 +267,31 @@ export default function Home() {
                   title: 'Backend Development: Online Book Review Application',
                   desc: 'Book reviews, ratings, and secure user access.',
                   href: '/projects/book-review',
-                  image: bookReviewImg,
+                  image: '/covers/book-review.png',
                 },
                 {
                   title: 'Frontend & Backend Development: Travel Recommendation Web',
                   desc: 'Travel search, dynamic results, and location discovery.',
                   href: '/projects/travel-recommendation',
-                  image: travelRecommendationImg,
+                  image: '/covers/travel-recommendation.png',
                 },
                 {
                   title: 'Frontend Development javidev.site',
                   desc: 'Portfolio design, resources, and developer roadmaps.',
                   href: '/projects/javidev-site',
-                  image: javidevSiteImg,
+                  image: '/covers/javidev-site.png',
                 },
                 {
                   title: 'E-commerce Web Development – WhatToBuy',
                   desc: 'Online shopping, product browsing, and smooth checkout.',
                   href: '/projects/whattobuy',
-                  image: whatToBuyImg,
+                  image: '/covers/whattobuy.png',
                 },
                 {
                   title: 'Creative Agency Web Design – JV Luxe Marketing',
                   desc: 'Luxury branding, clean visuals, and agency presence.',
                   href: '/projects/jv-luxe',
-                  image: jvLuxeImg,
+                  image: '/covers/jv-luxe.png',
                 },
               ].map((proj, i) => (
                 <Link
