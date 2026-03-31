@@ -265,27 +265,27 @@ export default function Home() {
                 {
                   title: 'Backend Development: Online Book Review Application',
                   desc: 'A comprehensive book review platform with user authentication and rating system',
-                  href: `${import.meta.env.BASE_URL}projects/book-review/index.html`,
+                  href: 'https://jatest.vercel.app/projects/book-review/index.html',
                 },
                 {
                   title: 'Frontend & Backend Development: Travel Recommendation Web',
                   desc: 'Dynamic search functionality for travel destinations with real-time recommendations',
-                  href: `${import.meta.env.BASE_URL}projects/travel-recommendation/index.html`,
+                  href: 'https://jatest.vercel.app/projects/travel-recommendation/index.html',
                 },
                 {
                   title: 'Frontend Development javidev.site',
                   desc: 'UX/UI coding & design - Modern portfolio website',
-                  href: `${import.meta.env.BASE_URL}projects/javidev-site/index.html`,
+                  href: 'https://jatest.vercel.app/projects/javidev-site/index.html',
                 },
                 {
                   title: 'E-commerce Web Development – WhatToBuy',
                   desc: 'Full-featured e-commerce platform with WooCommerce integration',
-                  href: `${import.meta.env.BASE_URL}projects/whattobuy/index.html`,
+                  href: 'https://jatest.vercel.app/projects/whattobuy/index.html',
                 },
                 {
                   title: 'Creative Agency Web Design – JV Luxe Marketing',
                   desc: 'Elegant marketing agency website with custom WordPress theme',
-                  href: `${import.meta.env.BASE_URL}projects/jv-luxe/index.html`,
+                  href: 'https://jatest.vercel.app/projects/jv-luxe/index.html',
                 },
               ].map((proj, i) => (
                 <a
