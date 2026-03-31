@@ -1,5 +1,10 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import bookReviewImg from './projects/book-review/images/cover.png';
+import travelRecommendationImg from './projects/travel-recommendation/images/cover.png';
+import javidevSiteImg from './projects/javidev-site/images/Screenshot-2024-12-31-175150.png';
+import whatToBuyImg from './projects/whattobuy/images/landin-w2b.png';
+import jvLuxeImg from './projects/jv-luxe/images/Screenshot-2024-11-23-161043-768x367.png';
 
 const appsCreated = [
   {
@@ -265,28 +270,33 @@ export default function Home() {
               {[
                 {
                   title: 'Backend Development: Online Book Review Application',
-                  desc: 'A comprehensive book review platform with user authentication and rating system',
+                  desc: 'Book reviews, ratings, and secure user access.',
                   href: '/projects/book-review',
+                  image: bookReviewImg,
                 },
                 {
                   title: 'Frontend & Backend Development: Travel Recommendation Web',
-                  desc: 'Dynamic search functionality for travel destinations with real-time recommendations',
+                  desc: 'Travel search, dynamic results, and location discovery.',
                   href: '/projects/travel-recommendation',
+                  image: travelRecommendationImg,
                 },
                 {
                   title: 'Frontend Development javidev.site',
-                  desc: 'UX/UI coding & design - Modern portfolio website',
+                  desc: 'Portfolio design, resources, and developer roadmaps.',
                   href: '/projects/javidev-site',
+                  image: javidevSiteImg,
                 },
                 {
                   title: 'E-commerce Web Development – WhatToBuy',
-                  desc: 'Full-featured e-commerce platform with WooCommerce integration',
+                  desc: 'Online shopping, product browsing, and smooth checkout.',
                   href: '/projects/whattobuy',
+                  image: whatToBuyImg,
                 },
                 {
                   title: 'Creative Agency Web Design – JV Luxe Marketing',
-                  desc: 'Elegant marketing agency website with custom WordPress theme',
+                  desc: 'Luxury branding, clean visuals, and agency presence.',
                   href: '/projects/jv-luxe',
+                  image: jvLuxeImg,
                 },
               ].map((proj, i) => (
                 <Link
@@ -299,8 +309,12 @@ export default function Home() {
                     border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)',
                     transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)', cursor: 'pointer'
                   }} className="project-card-home">
-                    <div style={{ width: '100%', height: 180, background: 'var(--hover-bg)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <i className="fas fa-code" style={{ fontSize: '2rem', color: 'var(--text-tertiary)' }} />
+                    <div style={{ width: '100%', height: 180, background: 'var(--hover-bg)', overflow: 'hidden' }}>
+                      <img
+                        src={proj.image}
+                        alt={proj.title}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      />
                     </div>
                     <div style={{ padding: '1.25rem' }}>
                       <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.15rem', fontWeight: 600, marginBottom: '0.5rem' }}>
