@@ -18,7 +18,7 @@ export default function AdminDashboard() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [generating, setGenerating] = useState(false);
+  const [generatingId, setGeneratingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && (!user || !isAdmin)) {
@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   };
 
   const generateQuestions = async (quiz: Quiz) => {
-    setGenerating(true);
+    setGeneratingId(quiz.id);
     try {
       const res = await supabase.functions.invoke('generate-questions', {
         body: {
@@ -80,7 +80,7 @@ export default function AdminDashboard() {
       toast.error('Error generating questions');
       console.error(e);
     }
-    setGenerating(false);
+    setGeneratingId(null);
   };
 
   const publishQuiz = async (quiz: Quiz) => {
@@ -152,8 +152,8 @@ export default function AdminDashboard() {
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" onClick={() => generateQuestions(quiz)} disabled={generating}>
-                    {generating ? <Loader2 className="animate-spin w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
+                  <Button variant="ghost" size="sm" onClick={() => generateQuestions(quiz)} disabled={generatingId !== null}>
+                    {generatingId === quiz.id ? <Loader2 className="animate-spin w-4 h-4" /> : <Sparkles className="w-4 h-4" />}
                   </Button>
                   <Button variant="ghost" size="sm" onClick={() => navigate(`/LantestAI/admin/quiz/${quiz.id}`)}>
                     <Eye className="w-4 h-4" />

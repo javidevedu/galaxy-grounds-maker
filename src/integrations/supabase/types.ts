@@ -17,6 +17,7 @@ export type Database = {
       answers: {
         Row: {
           attempt_id: string
+          created_at: string
           id: string
           is_correct: boolean | null
           question_id: string
@@ -25,6 +26,7 @@ export type Database = {
         }
         Insert: {
           attempt_id: string
+          created_at?: string
           id?: string
           is_correct?: boolean | null
           question_id: string
@@ -33,6 +35,7 @@ export type Database = {
         }
         Update: {
           attempt_id?: string
+          created_at?: string
           id?: string
           is_correct?: boolean | null
           question_id?: string
@@ -63,6 +66,7 @@ export type Database = {
           is_completed: boolean
           quiz_id: string
           score: number | null
+          speaking_feedback: string | null
           started_at: string
           student_id: string
           student_name: string
@@ -75,6 +79,7 @@ export type Database = {
           is_completed?: boolean
           quiz_id: string
           score?: number | null
+          speaking_feedback?: string | null
           started_at?: string
           student_id: string
           student_name: string
@@ -87,6 +92,7 @@ export type Database = {
           is_completed?: boolean
           quiz_id?: string
           score?: number | null
+          speaking_feedback?: string | null
           started_at?: string
           student_id?: string
           student_name?: string
@@ -107,6 +113,7 @@ export type Database = {
         Row: {
           audio_script: string | null
           correct_answer: string
+          created_at: string
           id: string
           option_a: string | null
           option_b: string | null
@@ -115,11 +122,12 @@ export type Database = {
           question_text: string
           quiz_id: string
           sort_order: number
-          type: Database["public"]["Enums"]["question_type"]
+          type: string
         }
         Insert: {
           audio_script?: string | null
-          correct_answer: string
+          correct_answer?: string
+          created_at?: string
           id?: string
           option_a?: string | null
           option_b?: string | null
@@ -128,11 +136,12 @@ export type Database = {
           question_text: string
           quiz_id: string
           sort_order?: number
-          type?: Database["public"]["Enums"]["question_type"]
+          type?: string
         }
         Update: {
           audio_script?: string | null
           correct_answer?: string
+          created_at?: string
           id?: string
           option_a?: string | null
           option_b?: string | null
@@ -141,7 +150,7 @@ export type Database = {
           question_text?: string
           quiz_id?: string
           sort_order?: number
-          type?: Database["public"]["Enums"]["question_type"]
+          type?: string
         }
         Relationships: [
           {
@@ -155,49 +164,49 @@ export type Database = {
       }
       quizzes: {
         Row: {
-          audio_speed: number
+          audio_speed: number | null
           created_at: string
           created_by: string | null
           id: string
           is_published: boolean
           mcer_level: string
-          num_questions: number
-          skills: string[] | null
+          num_questions: number | null
+          skills: string[]
           target_audience: string
           time_limit_minutes: number | null
           title: string
           topics: string
-          writing_word_limit: number
+          writing_word_limit: number | null
         }
         Insert: {
-          audio_speed?: number
+          audio_speed?: number | null
           created_at?: string
           created_by?: string | null
           id?: string
           is_published?: boolean
           mcer_level?: string
-          num_questions?: number
-          skills?: string[] | null
+          num_questions?: number | null
+          skills?: string[]
           target_audience?: string
           time_limit_minutes?: number | null
           title: string
           topics?: string
-          writing_word_limit?: number
+          writing_word_limit?: number | null
         }
         Update: {
-          audio_speed?: number
+          audio_speed?: number | null
           created_at?: string
           created_by?: string | null
           id?: string
           is_published?: boolean
           mcer_level?: string
-          num_questions?: number
-          skills?: string[] | null
+          num_questions?: number | null
+          skills?: string[]
           target_audience?: string
           time_limit_minutes?: number | null
           title?: string
           topics?: string
-          writing_word_limit?: number
+          writing_word_limit?: number | null
         }
         Relationships: []
       }
@@ -233,13 +242,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "user"
-      question_type:
-        | "multiple_choice"
-        | "fill_blank"
-        | "listening"
-        | "writing"
-        | "speaking"
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -367,14 +370,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "user"],
-      question_type: [
-        "multiple_choice",
-        "fill_blank",
-        "listening",
-        "writing",
-        "speaking",
-      ],
+      app_role: ["admin", "moderator", "user"],
     },
   },
 } as const

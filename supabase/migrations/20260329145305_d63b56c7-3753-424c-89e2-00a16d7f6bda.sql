@@ -1,0 +1,1 @@
+ALTER TABLE public.attempts ADD COLUMN speaking_feedback text DEFAULT null;

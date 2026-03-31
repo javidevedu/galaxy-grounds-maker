@@ -190,15 +190,15 @@ export default function CreateQuizForm({ onSubmit, creating }: CreateQuizFormPro
             <Label>Writing Word Limit ({writingWordLimit} words)</Label>
             <input
               type="range"
-              min={50}
+              min={5}
               max={300}
-              step={10}
+              step={5}
               value={writingWordLimit}
               onChange={(e) => setWritingWordLimit(parseInt(e.target.value))}
               className="w-full accent-primary"
             />
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>50</span>
+              <span>5</span>
               <span>150</span>
               <span>300</span>
             </div>
