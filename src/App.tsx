@@ -12,7 +12,11 @@ import AdminResults from "./pages/AdminResults";
 import AdminQuizDetail from "./pages/AdminQuizDetail";
 import QuizStart from "./pages/QuizStart";
 import QuizTake from "./pages/QuizTake";
-import ProjectDetail from "./pages/ProjectDetail";
+import BookReview from "./pages/projects/BookReview";
+import TravelRecommendation from "./pages/projects/TravelRecommendation";
+import JavidevSite from "./pages/projects/JavidevSite";
+import WhatToBuy from "./pages/projects/WhatToBuy";
+import JVLuxe from "./pages/projects/JVLuxe";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,8 +37,11 @@ const App = () => (
             <Route path="/LantestAI/admin/quiz/:quizId" element={<AdminQuizDetail />} />
             <Route path="/LantestAI/quiz/:quizId" element={<QuizStart />} />
             <Route path="/LantestAI/quiz/:quizId/take/:attemptId" element={<QuizTake />} />
-            <Route path="/projects/:projectSlug" element={<ProjectDetail />} />
-            <Route path="/projects/:projectSlug/index.html" element={<ProjectDetail />} />
+            <Route path="/projects/book-review" element={<BookReview />} />
+            <Route path="/projects/travel-recommendation" element={<TravelRecommendation />} />
+            <Route path="/projects/javidev-site" element={<JavidevSite />} />
+            <Route path="/projects/whattobuy" element={<WhatToBuy />} />
+            <Route path="/projects/jv-luxe" element={<JVLuxe />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </AuthProvider>
