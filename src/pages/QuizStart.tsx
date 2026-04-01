@@ -66,7 +66,7 @@ export default function QuizStart() {
     }).select().single();
 
     if (error || !data) {
-      toast.error('Error starting quiz');
+      toast.error('Error starting test');
       setStarting(false);
       return;
     }
