@@ -67,7 +67,7 @@ export default function CreateQuizForm({ onSubmit, creating }: CreateQuizFormPro
   return (
     <Card className="mb-6 glass-card">
       <CardHeader>
-        <CardTitle>Create New Quiz</CardTitle>
+        <CardTitle>Create New Test</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
