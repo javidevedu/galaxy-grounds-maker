@@ -51,10 +51,10 @@ export default function AdminDashboard() {
     } as any).select().single();
     setCreating(false);
     if (error) {
-      toast.error('Error creating quiz');
+      toast.error('Error creating test');
       return;
     }
-    toast.success('Quiz created!');
+    toast.success('Test created!');
     setShowCreate(false);
     fetchQuizzes();
   };
@@ -85,13 +85,13 @@ export default function AdminDashboard() {
 
   const publishQuiz = async (quiz: Quiz) => {
     await supabase.from('quizzes').update({ is_published: !quiz.is_published }).eq('id', quiz.id);
-    toast.success(quiz.is_published ? 'Quiz unpublished' : 'Quiz published!');
+    toast.success(quiz.is_published ? 'Test unpublished' : 'Test published!');
     fetchQuizzes();
   };
 
   const deleteQuiz = async (id: string) => {
     await supabase.from('quizzes').delete().eq('id', id);
-    toast.success('Quiz deleted');
+    toast.success('Test deleted');
     fetchQuizzes();
   };
 
@@ -125,9 +125,9 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-heading font-bold">Quizzes</h2>
+          <h2 className="text-2xl font-heading font-bold">Tests</h2>
           <Button onClick={() => setShowCreate(!showCreate)}>
-            <Plus className="w-4 h-4 mr-1" /> New Quiz
+            <Plus className="w-4 h-4 mr-1" /> New Test
           </Button>
         </div>
 
@@ -176,7 +176,7 @@ export default function AdminDashboard() {
           {quizzes.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
               <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p>No quizzes yet. Create your first quiz to get started!</p>
+              <p>No tests yet. Create your first test to get started!</p>
             </div>
           )}
         </div>

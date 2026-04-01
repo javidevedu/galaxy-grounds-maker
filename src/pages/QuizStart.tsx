@@ -66,7 +66,7 @@ export default function QuizStart() {
     }).select().single();
 
     if (error || !data) {
-      toast.error('Error starting quiz');
+      toast.error('Error starting test');
       setStarting(false);
       return;
     }
@@ -80,7 +80,7 @@ export default function QuizStart() {
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md">
         <CardContent className="py-8 text-center">
-          <p className="text-muted-foreground">Quiz not found or not published.</p>
+          <p className="text-muted-foreground">Test not found or not published.</p>
         </CardContent>
       </Card>
     </div>
@@ -118,7 +118,7 @@ export default function QuizStart() {
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={starting}>
               {starting ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <BookOpen className="w-4 h-4 mr-2" />}
-              Start Quiz
+              Start Test
             </Button>
           </form>
         </CardContent>

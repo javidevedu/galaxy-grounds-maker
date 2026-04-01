@@ -210,8 +210,8 @@ export default function QuizTake() {
       <Card className="w-full max-w-md text-center">
         <CardContent className="py-12 space-y-4">
           <AlertTriangle className="w-16 h-16 mx-auto text-destructive" />
-          <h2 className="text-2xl font-heading font-bold">Quiz Closed</h2>
-          <p className="text-muted-foreground">Quiz closed due to academic integrity violation.</p>
+          <h2 className="text-2xl font-heading font-bold">Test Closed</h2>
+          <p className="text-muted-foreground">Test closed due to academic integrity violation.</p>
         </CardContent>
       </Card>
     </div>
@@ -239,12 +239,12 @@ export default function QuizTake() {
             <CardContent className="py-8 text-center space-y-4">
               <AlertTriangle className="w-16 h-16 mx-auto text-warning" />
               <h2 className="text-xl font-heading font-bold">WARNING</h2>
-              <p>You left the exam window. If this happens again the quiz will close.</p>
+              <p>You left the test window. If this happens again the test will close.</p>
               <Button onClick={() => {
                 setShowWarning(false);
                 try { document.documentElement.requestFullscreen(); } catch {}
               }}>
-                Continue Exam
+                Continue Test
               </Button>
             </CardContent>
           </Card>
@@ -390,7 +390,7 @@ export default function QuizTake() {
           {current === questions.length - 1 ? (
             <Button onClick={handleSubmit} disabled={submitting}>
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mr-1" /> : <CheckCircle2 className="w-4 h-4 mr-1" />}
-              Submit Quiz
+              Submit Test
             </Button>
           ) : (
             <Button onClick={() => setCurrent(Math.min(questions.length - 1, current + 1))}>

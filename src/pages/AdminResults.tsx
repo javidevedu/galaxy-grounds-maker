@@ -84,7 +84,7 @@ export default function AdminResults() {
     for (const a of attempts) {
       const key = a.quiz_id;
       if (!groups[key]) {
-        groups[key] = { title: a.quizzes?.title || 'Unknown Quiz', attempts: [] };
+        groups[key] = { title: a.quizzes?.title || 'Unknown Test', attempts: [] };
       }
       groups[key].attempts.push(a);
     }
@@ -122,7 +122,7 @@ export default function AdminResults() {
   };
 
   const exportCSV = () => {
-    const headers = ['Quiz', 'Student Name', 'Student ID', 'Score', 'Total Questions', 'Percentage', 'Date', 'Time', 'Status', 'Warnings'];
+    const headers = ['Test', 'Student Name', 'Student ID', 'Score', 'Total Questions', 'Percentage', 'Date', 'Time', 'Status', 'Warnings'];
     const sortedAttempts = [...attempts].sort((a, b) => {
       const quizA = a.quizzes?.title || '';
       const quizB = b.quizzes?.title || '';

@@ -88,7 +88,7 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
         <Card>
           <CardContent className="py-8 text-center space-y-3">
             <CheckCircle2 className="w-14 h-14 mx-auto text-primary" />
-            <h2 className="text-2xl font-heading font-bold">Quiz Completed!</h2>
+            <h2 className="text-2xl font-heading font-bold">Test Completed!</h2>
             <div className="text-5xl font-heading font-bold text-primary">
               {scorableCorrect}<span className="text-2xl text-muted-foreground">/{scorableTotal}</span>
             </div>
