@@ -122,16 +122,41 @@ export default function AdminResults() {
   };
 
   const exportCSV = () => {
-    const headers = 'Student Name,Student ID,Quiz,Score,Total,Date,Warnings\n';
-    const rows = attempts.map(a =>
-      `"${a.student_name}","${a.student_id}","${a.quizzes?.title || ''}",${a.score || 0},${a.total_questions || 0},"${new Date(a.started_at).toLocaleDateString()}",${a.warnings}`
-    ).join('\n');
-    const blob = new Blob([headers + rows], { type: 'text/csv' });
+    const headers = ['Quiz', 'Student Name', 'Student ID', 'Score', 'Total Questions', 'Percentage', 'Date', 'Time', 'Status', 'Warnings'];
+    const sortedAttempts = [...attempts].sort((a, b) => {
+      const quizA = a.quizzes?.title || '';
+      const quizB = b.quizzes?.title || '';
+      if (quizA !== quizB) return quizA.localeCompare(quizB);
+      return a.student_name.localeCompare(b.student_name);
+    });
+
+    const rows = sortedAttempts.map(a => {
+      const score = a.score || 0;
+      const total = a.total_questions || 0;
+      const pct = total > 0 ? Math.round((score / total) * 100) : 0;
+      const date = new Date(a.started_at);
+      return [
+        a.quizzes?.title || 'Unknown',
+        a.student_name,
+        a.student_id,
+        score,
+        total,
+        `${pct}%`,
+        date.toLocaleDateString(),
+        date.toLocaleTimeString(),
+        a.is_completed ? 'Completed' : 'Closed',
+        a.warnings
+      ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+    });
+
+    const csv = [headers.map(h => `"${h}"`).join(','), ...rows].join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'results.csv';
+    link.download = `results_${new Date().toISOString().slice(0, 10)}.csv`;
     link.click();
+    URL.revokeObjectURL(url);
     toast.success('CSV exported!');
   };
 
