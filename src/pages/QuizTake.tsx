@@ -244,7 +244,7 @@ export default function QuizTake() {
                 setShowWarning(false);
                 try { document.documentElement.requestFullscreen(); } catch {}
               }}>
-                Continue Exam
+                Continue Test
               </Button>
             </CardContent>
           </Card>
