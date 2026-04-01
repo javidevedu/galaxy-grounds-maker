@@ -1,5 +1,7 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
+
+const VRPerson3D = lazy(() => import('@/components/VRPerson3D'));
 
 const appsCreated = [
   {
