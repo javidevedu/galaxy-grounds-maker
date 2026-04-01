@@ -122,18 +122,53 @@ export default function QuizTake() {
     setIsPlaying(false);
   };
 
+  const getEnglishVoice = (): SpeechSynthesisVoice | null => {
+    const voices = speechSynthesis.getVoices();
+    // Prefer native English voices, prioritize en-US
+    const preferred = voices.find(v => v.lang === 'en-US' && !v.localService === false) 
+      || voices.find(v => v.lang === 'en-US')
+      || voices.find(v => v.lang.startsWith('en-'))
+      || voices.find(v => v.lang.startsWith('en'));
+    return preferred || null;
+  };
+
   const speakText = (text: string) => {
     if (isPlaying) {
       stopAudio();
       return;
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'en-US';
-    utterance.rate = (quiz as any)?.audio_speed ?? 0.9;
-    utterance.onend = () => setIsPlaying(false);
-    utterance.onerror = () => setIsPlaying(false);
-    setIsPlaying(true);
-    speechSynthesis.speak(utterance);
+
+    // Ensure voices are loaded before speaking
+    const doSpeak = () => {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+
+      // Force an English voice to prevent Spanish pronunciation
+      const englishVoice = getEnglishVoice();
+      if (englishVoice) {
+        utterance.voice = englishVoice;
+      }
+
+      const speed = (quiz as any)?.audio_speed ?? 0.9;
+      utterance.rate = speed;
+      // Keep pitch natural even at slower speeds
+      utterance.pitch = 1.0;
+
+      utterance.onend = () => setIsPlaying(false);
+      utterance.onerror = () => setIsPlaying(false);
+      setIsPlaying(true);
+      speechSynthesis.speak(utterance);
+    };
+
+    // Voices may not be loaded yet on some browsers
+    if (speechSynthesis.getVoices().length === 0) {
+      speechSynthesis.onvoiceschanged = () => {
+        doSpeak();
+        speechSynthesis.onvoiceschanged = null;
+      };
+    } else {
+      doSpeak();
+    }
   };
 
   // Stop audio when navigating between questions
