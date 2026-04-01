@@ -84,7 +84,7 @@ export default function AdminResults() {
     for (const a of attempts) {
       const key = a.quiz_id;
       if (!groups[key]) {
-        groups[key] = { title: a.quizzes?.title || 'Unknown Quiz', attempts: [] };
+        groups[key] = { title: a.quizzes?.title || 'Unknown Test', attempts: [] };
       }
       groups[key].attempts.push(a);
     }

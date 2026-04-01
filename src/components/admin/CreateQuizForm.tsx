@@ -210,7 +210,7 @@ export default function CreateQuizForm({ onSubmit, creating }: CreateQuizFormPro
           disabled={creating || !title || !targetAudience || selectedSkills.length === 0 || selectedTopics.length === 0}
         >
           {creating ? <Loader2 className="animate-spin w-4 h-4 mr-1" /> : <Plus className="w-4 h-4 mr-1" />}
-          Create Quiz
+          Create Test
         </Button>
       </CardContent>
     </Card>

@@ -37,7 +37,7 @@ export default function AdminLogin() {
             <Shield className="w-7 h-7 text-primary-foreground" />
           </div>
           <CardTitle className="text-2xl font-heading">Admin Access</CardTitle>
-          <CardDescription>Sign in to manage quizzes and view results</CardDescription>
+          <CardDescription>Sign in to manage tests and view results</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">

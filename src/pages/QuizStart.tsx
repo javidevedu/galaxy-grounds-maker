@@ -118,7 +118,7 @@ export default function QuizStart() {
             </div>
             <Button type="submit" className="w-full" size="lg" disabled={starting}>
               {starting ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : <BookOpen className="w-4 h-4 mr-2" />}
-              Start Quiz
+              Start Test
             </Button>
           </form>
         </CardContent>

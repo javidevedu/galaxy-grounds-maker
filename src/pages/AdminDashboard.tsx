@@ -176,7 +176,7 @@ export default function AdminDashboard() {
           {quizzes.length === 0 && (
             <div className="text-center py-16 text-muted-foreground">
               <Sparkles className="w-12 h-12 mx-auto mb-4 opacity-30" />
-              <p>No quizzes yet. Create your first quiz to get started!</p>
+              <p>No tests yet. Create your first test to get started!</p>
             </div>
           )}
         </div>
