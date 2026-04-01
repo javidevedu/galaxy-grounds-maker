@@ -51,10 +51,10 @@ export default function AdminDashboard() {
     } as any).select().single();
     setCreating(false);
     if (error) {
-      toast.error('Error creating quiz');
+      toast.error('Error creating test');
       return;
     }
-    toast.success('Quiz created!');
+    toast.success('Test created!');
     setShowCreate(false);
     fetchQuizzes();
   };
