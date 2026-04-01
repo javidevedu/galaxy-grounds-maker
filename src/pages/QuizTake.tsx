@@ -390,7 +390,7 @@ export default function QuizTake() {
           {current === questions.length - 1 ? (
             <Button onClick={handleSubmit} disabled={submitting}>
               {submitting ? <Loader2 className="animate-spin w-4 h-4 mr-1" /> : <CheckCircle2 className="w-4 h-4 mr-1" />}
-              Submit Quiz
+              Submit Test
             </Button>
           ) : (
             <Button onClick={() => setCurrent(Math.min(questions.length - 1, current + 1))}>
