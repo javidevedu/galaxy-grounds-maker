@@ -32,35 +32,6 @@ export default function Home() {
     return () => observerRef.current?.disconnect();
   }, []);
 
-  const vrHeadRef = useRef<HTMLDivElement>(null);
-  const rayRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // VR head following cursor
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!vrHeadRef.current || !rayRef.current) return;
-      
-      const rect = vrHeadRef.current.getBoundingClientRect();
-      const eyeX = rect.left + rect.width / 2;
-      const eyeY = rect.top + rect.height / 2;
-      
-      const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
-      const distance = Math.hypot(e.clientX - eyeX, e.clientY - eyeY);
-      
-      // Rotate head slightly
-      const headRotation = (e.clientX - window.innerWidth / 2) * 0.02;
-      vrHeadRef.current.style.transform = `rotateY(${headRotation}deg) rotateZ(${(e.clientY - window.innerHeight / 2) * 0.01}deg)`;
-      
-      // Draw ray from eyes to cursor
-      rayRef.current.style.left = `${eyeX}px`;
-      rayRef.current.style.top = `${eyeY}px`;
-      rayRef.current.style.width = `${Math.min(distance, 800)}px`;
-      rayRef.current.style.transform = `rotate(${angle}rad)`;
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
 
   return (
     <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
@@ -83,15 +54,13 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Marker Board BG - Removed */}
-
-      {/* Hero - VR on Monitor Scene */}
+      {/* Hero - 3D VR Person on Monitor Scene */}
       <section style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
         position: 'relative', background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%)',
-        overflow: 'hidden', flexDirection: 'column', perspective: '1000px'
+        overflow: 'hidden', flexDirection: 'column'
       }}>
-        {/* Fondo animado */}
+        {/* Animated grid background */}
         <div style={{
           position: 'absolute', inset: 0, opacity: 0.08,
           backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(99,102,241,.3) 25%, rgba(99,102,241,.3) 26%, transparent 27%, transparent 74%, rgba(99,102,241,.3) 75%, rgba(99,102,241,.3) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(99,102,241,.3) 25%, rgba(99,102,241,.3) 26%, transparent 27%, transparent 74%, rgba(99,102,241,.3) 75%, rgba(99,102,241,.3) 76%, transparent 77%, transparent)',
@@ -99,69 +68,44 @@ export default function Home() {
           animation: 'gridMove 20s linear infinite', zIndex: 0
         }} />
 
-        {/* Ray from Eyes */}
-        <div ref={rayRef} style={{
-          position: 'fixed', height: 3, background: 'linear-gradient(90deg, #00ffff, transparent)',
-          pointerEvents: 'none', zIndex: 20, transformOrigin: 'left center'
-        }} />
+        {/* Scene container */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 20 }}>
 
-        {/* Monitor + VR Person + Keyboard */}
-        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 60 }}>
-          {/* Persona VR sentada en 3D sobre el monitor */}
-          <div style={{ position: 'absolute', top: -160, left: '50%', transform: 'translateX(-50%)', zIndex: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
-            {/* Piernas */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: -18, zIndex: 1 }}>
-              <div style={{ width: 18, height: 60, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(18deg)', border: '2px solid #222' }} />
-              <div style={{ width: 18, height: 60, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(-18deg)', border: '2px solid #222' }} />
-            </div>
-            {/* Cuerpo y brazos */}
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
-              {/* Cuerpo */}
-              <div style={{ width: 38, height: 70, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 20, boxShadow: '0 8px 24px #6366f155', marginBottom: -8, border: '2px solid #222', position: 'relative', zIndex: 2 }} />
-              {/* Brazos */}
-              <div style={{ position: 'absolute', top: 30, left: -32, display: 'flex', gap: 60, width: 100, height: 40, zIndex: 1 }}>
-                <div style={{ width: 18, height: 48, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(30deg)', border: '2px solid #222' }} />
-                <div style={{ width: 18, height: 48, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(-30deg)', border: '2px solid #222' }} />
+          {/* 3D Person sitting on top of monitor */}
+          <div style={{
+            width: 280, height: 260, position: 'relative', zIndex: 12, marginBottom: -40,
+          }}>
+            <Suspense fallback={
+              <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#6366f1', fontSize: 48 }}>
+                🤖
               </div>
-            </div>
-            {/* Cabeza con VR, sigue el mouse */}
-            <div ref={vrHeadRef} style={{
-              width: 80, height: 80, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '50%',
-              boxShadow: '0 8px 32px #6366f199, 0 0 0 8px #1a1a2e', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'transform 0.05s ease-out', zIndex: 3, marginTop: -110, border: '2.5px solid #222'
-            }}>
-              {/* VR Glasses */}
-              <div style={{ position: 'absolute', top: 28, left: 10, width: 60, height: 24, background: 'linear-gradient(90deg, #00ffff 60%, #6366f1 100%)', borderRadius: 12, boxShadow: '0 0 16px #00ffff99', border: '2px solid #00ffff88', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 22, color: '#222', fontWeight: 700, marginRight: 4 }}>👓</span>
-              </div>
-              {/* Nariz */}
-              <div style={{ position: 'absolute', top: 48, left: 36, width: 8, height: 12, background: '#222', borderRadius: 6, opacity: 0.18 }} />
-            </div>
+            }>
+              <VRPerson3D />
+            </Suspense>
           </div>
 
-          {/* Monitor grande */}
+          {/* Monitor */}
           <div style={{
-            width: 480, height: 320, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            border: '12px solid #2a2a4e', borderRadius: 18,
-            boxShadow: '0 40px 80px #6366f133, 0 0 0 8px #222',
-            position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center',
-            justifyContent: 'center', marginBottom: 32, marginTop: 40
+            width: 500, maxWidth: '92vw', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            border: '10px solid #2a2a4e', borderRadius: 16,
+            boxShadow: '0 40px 80px #6366f133, 0 0 0 6px #222, inset 0 0 60px rgba(0,255,255,0.03)',
+            position: 'relative', overflow: 'hidden', marginBottom: 12
           }}>
-            {/* Pantalla (contenido hero) */}
+            {/* Screen content */}
             <div style={{
-              width: '100%', height: '100%', padding: '2.5rem 2rem 1.5rem 2rem', display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', color: '#00ff88', fontFamily: "'Space Mono', monospace",
-              fontSize: '1rem', textAlign: 'center', animation: 'screenGlow 2s ease-in-out infinite', zIndex: 2,
-              position: 'relative', pointerEvents: 'auto'
+              padding: '2rem 1.5rem 1.5rem', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', color: '#00ff88',
+              fontFamily: "'Space Mono', monospace", textAlign: 'center',
+              animation: 'screenGlow 2s ease-in-out infinite', position: 'relative', zIndex: 2
             }}>
-              <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '1.2rem', color: '#00ffff' }}>JaviDevEdu - EDTECH</div>
-              <div style={{ fontSize: '2.1rem', color: '#00ff88', fontWeight: 700, marginBottom: '1.2rem', fontFamily: "'Space Grotesk', sans-serif" }}>JaviDevEdu</div>
-              <div style={{ fontSize: '1.1rem', lineHeight: 1.4, color: '#fff', marginBottom: '1.5rem', fontWeight: 500 }}>I love to create software to inspire and educate.</div>
-              <div style={{ marginBottom: '1.2rem' }}>
-                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em', color: '#00ff88' }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.4rem', fontSize: '1.1rem', color: '#00ffff', letterSpacing: '0.05em' }}>JaviDevEdu - EDTECH</div>
+              <div style={{ fontSize: '2rem', color: '#00ff88', fontWeight: 700, marginBottom: '0.8rem', fontFamily: "'Space Grotesk', sans-serif" }}>JaviDevEdu</div>
+              <div style={{ fontSize: '1rem', lineHeight: 1.5, color: '#fff', marginBottom: '1.2rem', fontWeight: 400, maxWidth: 380 }}>I love to create software to inspire and educate.</div>
+              <div>
+                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.5rem', color: '#00ff88' }}>
                   Apps Created
                 </h2>
-                <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                   {appsCreated.map((app, i) => (
                     app.active ? (
                       <a
@@ -172,81 +116,84 @@ export default function Home() {
                         style={{
                           background: 'rgba(99,102,241,0.2)',
                           borderRadius: 10, border: '1px solid #00ffff55', color: '#fff',
-                          display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1.1rem', fontWeight: 600,
-                          fontSize: '1.1rem', boxShadow: '0 2px 8px #00ffff33', marginBottom: 4,
-                          textDecoration: 'none', transition: 'all 0.2s', pointerEvents: 'auto'
-                        }}
-                        onMouseEnter={e => {
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(0,255,255,0.2)';
-                          (e.currentTarget as HTMLElement).style.color = '#222';
-                        }}
-                        onMouseLeave={e => {
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.2)';
-                          (e.currentTarget as HTMLElement).style.color = '#fff';
+                          display: 'flex', alignItems: 'center', gap: 6, padding: '0.45rem 1rem', fontWeight: 600,
+                          fontSize: '1rem', boxShadow: '0 2px 8px #00ffff33',
+                          textDecoration: 'none', transition: 'all 0.2s'
                         }}
                       >
-                        <span style={{ fontSize: '1.3rem' }}>{app.icon}</span> {app.name}
+                        <span style={{ fontSize: '1.2rem' }}>{app.icon}</span> {app.name}
                       </a>
                     ) : (
                       <span key={i} style={{
                         background: 'rgba(99,102,241,0.1)',
                         borderRadius: 10, border: '1px solid #00ffff55', color: '#fff',
-                        display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1.1rem', fontWeight: 600,
-                        fontSize: '1.1rem', opacity: 0.6, marginBottom: 4
+                        display: 'flex', alignItems: 'center', gap: 6, padding: '0.45rem 1rem', fontWeight: 600,
+                        fontSize: '1rem', opacity: 0.5
                       }}>
-                        <span style={{ fontSize: '1.3rem' }}>{app.icon}</span> {app.name}
+                        <span style={{ fontSize: '1.2rem' }}>{app.icon}</span> {app.name}
                       </span>
                     )
                   ))}
                 </div>
               </div>
             </div>
-            {/* Screen Glitch Effect */}
+            {/* Scan effect */}
             <div style={{
-              position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,255,0.08) 50%, transparent 100%)',
+              position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,255,0.06) 50%, transparent 100%)',
               animation: 'screenScan 8s linear infinite', zIndex: 1, pointerEvents: 'none'
             }} />
           </div>
 
-          {/* Teclado QWERTY completo, solo JAVIDEV EDU con highlight */}
-          <div style={{ marginTop: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem', perspective: '1000px', zIndex: 11, alignItems: 'center' }}>
+          {/* Monitor stand */}
+          <div style={{ width: 60, height: 30, background: '#2a2a4e', borderRadius: '0 0 4px 4px', marginBottom: 2 }} />
+          <div style={{ width: 120, height: 8, background: '#2a2a4e', borderRadius: 4 }} />
+
+          {/* 3D Keyboard */}
+          <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: '0.2rem', alignItems: 'center' }}>
             {[
               ['Q','W','E','R','T','Y','U','I','O','P'],
               ['A','S','D','F','G','H','J','K','L'],
               ['Z','X','C','V','B','N','M']
             ].map((row, rowIdx) => (
-              <div key={rowIdx} style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+              <div key={rowIdx} style={{ display: 'flex', gap: '0.2rem', justifyContent: 'center' }}>
                 {row.map((key, i) => {
-                  const highlight = 'JAVIDEVEDU'.includes(key.replace(' ',''));
-                  if (key === ' ') {
-                    return <div key={i} style={{ width: 44, height: 44, margin: '0 8px' }} />;
-                  }
+                  const highlight = 'JAVIDEVEDU'.includes(key);
                   return (
                     <div
                       key={i}
                       style={{
-                        width: 44, height: 44, background: highlight ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#222',
+                        width: 40, height: 40, background: highlight ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#1a1a2e',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        borderRadius: 6, color: highlight ? 'white' : '#aaa', fontWeight: 700, cursor: highlight ? 'pointer' : 'default',
-                        boxShadow: highlight ? '0 4px 16px #6366f155, inset 0 -2px 8px #222' : '0 2px 4px #111',
-                        transition: 'all 0.1s cubic-bezier(.4,0,.2,1)', transform: 'translateY(0)',
-                        fontSize: '1.1rem',
-                        animation: highlight ? `keyboardBounce ${0.6 + i * 0.08}s ease-in-out infinite` : 'none',
-                        border: highlight ? '2px solid #222' : '1px solid #333',
-                        opacity: rowIdx === 3 && !highlight ? 0 : 1
+                        borderRadius: 5, color: highlight ? '#fff' : '#555', fontWeight: 700,
+                        cursor: 'default',
+                        boxShadow: highlight ? '0 3px 12px #6366f155, inset 0 -2px 4px #00000033' : '0 2px 4px #00000044, inset 0 -1px 2px #00000022',
+                        transition: 'all 0.15s ease',
+                        fontSize: '0.95rem',
+                        border: highlight ? '1.5px solid #818cf8' : '1px solid #333',
+                        transform: 'perspective(500px) rotateX(8deg)',
                       }}
-                      onMouseEnter={highlight ? e => {
-                        (e.target as HTMLElement).style.transform = 'translateY(7px) scale(1.08)';
-                        (e.target as HTMLElement).style.boxShadow = '0 2px 8px #00ffff99, 0 0 0 2px #00ffff';
-                        (e.target as HTMLElement).style.background = 'linear-gradient(135deg, #00ffff, #6366f1)';
-                        (e.target as HTMLElement).style.color = '#222';
-                      } : undefined}
-                      onMouseLeave={highlight ? e => {
-                        (e.target as HTMLElement).style.transform = 'translateY(0) scale(1)';
-                        (e.target as HTMLElement).style.boxShadow = '0 4px 16px #6366f155, inset 0 -2px 8px #222';
-                        (e.target as HTMLElement).style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
-                        (e.target as HTMLElement).style.color = 'white';
-                      } : undefined}
+                      onMouseEnter={e => {
+                        const el = e.currentTarget;
+                        el.style.transform = 'perspective(500px) rotateX(8deg) translateY(4px) scale(1.08)';
+                        el.style.boxShadow = highlight
+                          ? '0 1px 6px #00ffff99, 0 0 0 2px #00ffff66'
+                          : '0 1px 4px #00000066';
+                        if (highlight) {
+                          el.style.background = 'linear-gradient(135deg, #00ffff, #6366f1)';
+                          el.style.color = '#0f0f1e';
+                        }
+                      }}
+                      onMouseLeave={e => {
+                        const el = e.currentTarget;
+                        el.style.transform = 'perspective(500px) rotateX(8deg) translateY(0) scale(1)';
+                        el.style.boxShadow = highlight
+                          ? '0 3px 12px #6366f155, inset 0 -2px 4px #00000033'
+                          : '0 2px 4px #00000044, inset 0 -1px 2px #00000022';
+                        if (highlight) {
+                          el.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
+                          el.style.color = '#fff';
+                        }
+                      }}
                     >
                       {key}
                     </div>
@@ -254,25 +201,36 @@ export default function Home() {
                 })}
               </div>
             ))}
+            {/* Spacebar */}
+            <div style={{
+              width: 200, height: 36, background: '#1a1a2e', borderRadius: 5,
+              border: '1px solid #333', transform: 'perspective(500px) rotateX(8deg)',
+              boxShadow: '0 2px 4px #00000044, inset 0 -1px 2px #00000022',
+              transition: 'all 0.15s ease', cursor: 'default'
+            }}
+            onMouseEnter={e => {
+              e.currentTarget.style.transform = 'perspective(500px) rotateX(8deg) translateY(3px)';
+              e.currentTarget.style.boxShadow = '0 1px 3px #00000066';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.transform = 'perspective(500px) rotateX(8deg) translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 4px #00000044, inset 0 -1px 2px #00000022';
+            }}
+            />
           </div>
         </div>
 
-        {/* Scroll down */}
+        {/* Scroll indicator */}
         <div style={{
-          position: 'absolute', bottom: '3rem', left: '50%', transform: 'translateX(-50%)',
+          position: 'absolute', bottom: '2.5rem', left: '50%', transform: 'translateX(-50%)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-          color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem', animation: 'bounce 2s infinite', zIndex: 30
+          color: 'rgba(255,255,255,0.4)', fontSize: '0.9rem', animation: 'bounce 2s infinite', zIndex: 30
         }}>
           <span>Scroll to explore</span>
-          <i className="fas fa-chevron-down" style={{ fontSize: '1.7rem' }} />
+          <span style={{ fontSize: '1.4rem' }}>↓</span>
         </div>
 
-        {/* Animaciones */}
         <style>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-          }
           @keyframes screenGlow {
             0%, 100% { text-shadow: 0 0 10px #00ff88, 0 0 20px rgba(0,255,255,0.5); }
             50% { text-shadow: 0 0 20px #00ff88, 0 0 40px rgba(0,255,255,0.8); }
@@ -281,10 +239,6 @@ export default function Home() {
             0% { transform: translateY(-100%); }
             100% { transform: translateY(100%); }
           }
-          @keyframes keyboardBounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-          }
           @keyframes gridMove {
             0% { transform: translateY(0); }
             100% { transform: translateY(50px); }
@@ -292,13 +246,6 @@ export default function Home() {
           @keyframes bounce {
             0%, 100% { transform: translateX(-50%) translateY(0); }
             50% { transform: translateX(-50%) translateY(10px); }
-          }
-          @media (max-width: 968px) {
-            .hero-grid { grid-template-columns: 1fr !important; gap: 2rem; }
-          }
-          @media (max-width: 640px) {
-            .hero-grid { gap: 1.5rem; }
-            .hero-grid > div:first-child { height: 400px; }
           }
         `}</style>
       </section>
