@@ -91,7 +91,7 @@ export default function AdminDashboard() {
 
   const deleteQuiz = async (id: string) => {
     await supabase.from('quizzes').delete().eq('id', id);
-    toast.success('Quiz deleted');
+    toast.success('Test deleted');
     fetchQuizzes();
   };
 
