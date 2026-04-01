@@ -85,7 +85,7 @@ export default function AdminDashboard() {
 
   const publishQuiz = async (quiz: Quiz) => {
     await supabase.from('quizzes').update({ is_published: !quiz.is_published }).eq('id', quiz.id);
-    toast.success(quiz.is_published ? 'Quiz unpublished' : 'Quiz published!');
+    toast.success(quiz.is_published ? 'Test unpublished' : 'Test published!');
     fetchQuizzes();
   };
 
