@@ -239,7 +239,7 @@ export default function QuizTake() {
             <CardContent className="py-8 text-center space-y-4">
               <AlertTriangle className="w-16 h-16 mx-auto text-warning" />
               <h2 className="text-xl font-heading font-bold">WARNING</h2>
-              <p>You left the exam window. If this happens again the quiz will close.</p>
+              <p>You left the test window. If this happens again the test will close.</p>
               <Button onClick={() => {
                 setShowWarning(false);
                 try { document.documentElement.requestFullscreen(); } catch {}
