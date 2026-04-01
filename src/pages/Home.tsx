@@ -30,40 +30,34 @@ export default function Home() {
     return () => observerRef.current?.disconnect();
   }, []);
 
+  const vrHeadRef = useRef<HTMLDivElement>(null);
+  const rayRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    // Marker animation
-    const textPath = document.getElementById('text-path') as unknown as SVGTextPathElement;
-    const markerTip = document.getElementById('marker-tip');
-    const path = document.getElementById('writing-path') as unknown as SVGPathElement;
-    if (!textPath || !markerTip || !path) return;
-
-    const totalLength = path.getTotalLength();
-    let progress = 0;
-    let animating = true;
-
-    const animate = () => {
-      if (!animating) return;
-      progress += 0.15;
-      if (progress > 100) progress = 100;
-
-      const offsetPercent = 100 - progress;
-      textPath.setAttribute('startOffset', `${-offsetPercent}%`);
-
-      const charLen = (progress / 100) * totalLength;
-      const pt = path.getPointAtLength(Math.min(charLen, totalLength));
-      if (markerTip) {
-        markerTip.style.left = `calc(50% - ${500 - pt.x}px)`;
-        markerTip.style.top = `calc(${pt.y}px + 8vh + 60px)`;
-      }
-
-      if (progress < 100) requestAnimationFrame(animate);
+    // VR head following cursor
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!vrHeadRef.current || !rayRef.current) return;
+      
+      const rect = vrHeadRef.current.getBoundingClientRect();
+      const eyeX = rect.left + rect.width / 2;
+      const eyeY = rect.top + rect.height / 2;
+      
+      const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
+      const distance = Math.hypot(e.clientX - eyeX, e.clientY - eyeY);
+      
+      // Rotate head slightly
+      const headRotation = (e.clientX - window.innerWidth / 2) * 0.02;
+      vrHeadRef.current.style.transform = `rotateY(${headRotation}deg) rotateZ(${(e.clientY - window.innerHeight / 2) * 0.01}deg)`;
+      
+      // Draw ray from eyes to cursor
+      rayRef.current.style.left = `${eyeX}px`;
+      rayRef.current.style.top = `${eyeY}px`;
+      rayRef.current.style.width = `${Math.min(distance, 800)}px`;
+      rayRef.current.style.transform = `rotate(${angle}rad)`;
     };
-
-    const timer = setTimeout(() => requestAnimationFrame(animate), 1000);
-    return () => {
-      animating = false;
-      clearTimeout(timer);
-    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   return (
@@ -87,88 +81,224 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Marker Board BG */}
-      <div id="marker-board-bg" style={{ position: 'fixed', inset: 0, pointerEvents: 'none' }}>
-        <svg id="writing-svg" style={{ position: 'absolute', bottom: '8vh', left: '50%', transform: 'translateX(-50%)', width: 'min(1000px, 90vw)', height: 260 }}>
-          <defs>
-            <path id="writing-path" d="M 50 200 C 150 50, 250 50, 300 150 S 450 250, 500 150 S 650 50, 700 150 S 850 250, 950 150" fill="none" />
-          </defs>
-          <text className="writing-text" style={{ fontFamily: "'Pacifico','Segoe Script',cursive", fontSize: 120, fill: 'none', stroke: 'rgba(0,0,0,0.85)', strokeWidth: 5, strokeLinecap: 'round', strokeLinejoin: 'round' }}>
-            <textPath id="text-path" href="#writing-path" startOffset="-100%">JaviDevEdu</textPath>
-          </text>
-        </svg>
-        <div id="marker-tip" style={{ position: 'absolute', width: 36, height: 12, background: '#ffffff', borderRadius: 3, boxShadow: '0 2px 10px rgba(0,0,0,0.3)', transform: 'rotate(-8deg)', display: 'none' }} />
-      </div>
+      {/* Marker Board BG - Removed */}
 
-      {/* Hero */}
-      <section className="hero-fullscreen" style={{
+      {/* Hero - VR on Monitor Scene */}
+      <section style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        textAlign: 'center', position: 'relative',
-        background: 'linear-gradient(135deg, #fafafa 0%, #ffffff 100%)', overflow: 'hidden'
+        position: 'relative', background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%)',
+        overflow: 'hidden', flexDirection: 'column', perspective: '1000px'
       }}>
-        <div style={{ position: 'relative', zIndex: 1, maxWidth: 900, padding: '0 2rem', animation: 'fadeInUp 1s ease-out' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem', marginBottom: '1rem' }}>
-              <img src="/favicon.ico" alt="Favicon" style={{ width: 28, height: 28 }} />
+        {/* Fondo animado */}
+        <div style={{
+          position: 'absolute', inset: 0, opacity: 0.08,
+          backgroundImage: 'linear-gradient(0deg, transparent 24%, rgba(99,102,241,.3) 25%, rgba(99,102,241,.3) 26%, transparent 27%, transparent 74%, rgba(99,102,241,.3) 75%, rgba(99,102,241,.3) 76%, transparent 77%, transparent), linear-gradient(90deg, transparent 24%, rgba(99,102,241,.3) 25%, rgba(99,102,241,.3) 26%, transparent 27%, transparent 74%, rgba(99,102,241,.3) 75%, rgba(99,102,241,.3) 76%, transparent 77%, transparent)',
+          backgroundSize: '50px 50px',
+          animation: 'gridMove 20s linear infinite', zIndex: 0
+        }} />
+
+        {/* Ray from Eyes */}
+        <div ref={rayRef} style={{
+          position: 'fixed', height: 3, background: 'linear-gradient(90deg, #00ffff, transparent)',
+          pointerEvents: 'none', zIndex: 20, transformOrigin: 'left center'
+        }} />
+
+        {/* Monitor + VR Person + Keyboard */}
+        <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 60 }}>
+          {/* Persona VR sentada en 3D sobre el monitor */}
+          <div style={{ position: 'absolute', top: -160, left: '50%', transform: 'translateX(-50%)', zIndex: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
+            {/* Piernas */}
+            <div style={{ display: 'flex', gap: 10, marginBottom: -18, zIndex: 1 }}>
+              <div style={{ width: 18, height: 60, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(18deg)', border: '2px solid #222' }} />
+              <div style={{ width: 18, height: 60, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(-18deg)', border: '2px solid #222' }} />
             </div>
-            <span style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase' }}>JaviDevEdu - EDTECH</span>
-          <h1 style={{
-            fontFamily: "'Space Grotesk', sans-serif", fontSize: 'clamp(3rem, 8vw, 7rem)',
-            fontWeight: 700, lineHeight: 1.1, marginBottom: '1.5rem',
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #6366f1 100%)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
-            letterSpacing: '-0.02em'
-          }}>
-            JaviDevEdu
-          </h1>
-          <p style={{ fontSize: 'clamp(1.1rem, 2.5vw, 1.5rem)', color: 'var(--text-secondary)', fontWeight: 400, maxWidth: 600, margin: '0 auto 3rem', lineHeight: 1.6 }}>
-            I love to create software to inspire and educate.
-          </p>
-          <div style={{ marginBottom: '2rem', textAlign: 'center' }}>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em' }}>
-              Apps Created
-            </h2>
-            <p style={{ color: 'var(--text-secondary)', fontSize: '1rem' }}>My EdTech applications and tools</p>
+            {/* Cuerpo y brazos */}
+            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
+              {/* Cuerpo */}
+              <div style={{ width: 38, height: 70, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 20, boxShadow: '0 8px 24px #6366f155', marginBottom: -8, border: '2px solid #222', position: 'relative', zIndex: 2 }} />
+              {/* Brazos */}
+              <div style={{ position: 'absolute', top: 30, left: -32, display: 'flex', gap: 60, width: 100, height: 40, zIndex: 1 }}>
+                <div style={{ width: 18, height: 48, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(30deg)', border: '2px solid #222' }} />
+                <div style={{ width: 18, height: 48, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(-30deg)', border: '2px solid #222' }} />
+              </div>
+            </div>
+            {/* Cabeza con VR, sigue el mouse */}
+            <div ref={vrHeadRef} style={{
+              width: 80, height: 80, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '50%',
+              boxShadow: '0 8px 32px #6366f199, 0 0 0 8px #1a1a2e', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transition: 'transform 0.05s ease-out', zIndex: 3, marginTop: -110, border: '2.5px solid #222'
+            }}>
+              {/* VR Glasses */}
+              <div style={{ position: 'absolute', top: 28, left: 10, width: 60, height: 24, background: 'linear-gradient(90deg, #00ffff 60%, #6366f1 100%)', borderRadius: 12, boxShadow: '0 0 16px #00ffff99', border: '2px solid #00ffff88', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ fontSize: 22, color: '#222', fontWeight: 700, marginRight: 4 }}>👓</span>
+              </div>
+              {/* Nariz */}
+              <div style={{ position: 'absolute', top: 48, left: 36, width: 8, height: 12, background: '#222', borderRadius: 6, opacity: 0.18 }} />
+            </div>
           </div>
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem' }}>
-            {appsCreated.map((app, i) => (
-              <a
-                key={i}
-                href={app.active ? app.href : undefined}
-                target={app.active ? '_blank' : undefined}
-                rel={app.active ? 'noopener noreferrer' : undefined}
-                style={{
-                  background: 'var(--bg-secondary)', borderRadius: 12, overflow: 'hidden',
-                  border: '1px solid var(--border-color)', transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  cursor: app.active ? 'pointer' : 'default', textDecoration: 'none', color: 'inherit',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem',
-                  width: 180, height: 140, boxShadow: 'var(--shadow-sm)', opacity: app.active ? 1 : 0.6
-                }}
-                className={app.active ? 'app-card-active' : ''}
-                onClick={e => { if (!app.active) e.preventDefault(); }}
-              >
-                <div style={{
-                  width: 60, height: 60, borderRadius: '50%', background: app.active
-                    ? 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))'
-                    : 'var(--hover-bg)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', marginBottom: '0.5rem'
-                }}>
-                  {app.icon}
+
+          {/* Monitor grande */}
+          <div style={{
+            width: 480, height: 320, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
+            border: '12px solid #2a2a4e', borderRadius: 18,
+            boxShadow: '0 40px 80px #6366f133, 0 0 0 8px #222',
+            position: 'relative', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center',
+            justifyContent: 'center', marginBottom: 32, marginTop: 40
+          }}>
+            {/* Pantalla (contenido hero) */}
+            <div style={{
+              width: '100%', height: '100%', padding: '2.5rem 2rem 1.5rem 2rem', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', color: '#00ff88', fontFamily: "'Space Mono', monospace",
+              fontSize: '1rem', textAlign: 'center', animation: 'screenGlow 2s ease-in-out infinite', zIndex: 2,
+              position: 'relative', pointerEvents: 'auto'
+            }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.5rem', fontSize: '1.2rem', color: '#00ffff' }}>JaviDevEdu - EDTECH</div>
+              <div style={{ fontSize: '2.1rem', color: '#00ff88', fontWeight: 700, marginBottom: '1.2rem', fontFamily: "'Space Grotesk', sans-serif" }}>JaviDevEdu</div>
+              <div style={{ fontSize: '1.1rem', lineHeight: 1.4, color: '#fff', marginBottom: '1.5rem', fontWeight: 500 }}>I love to create software to inspire and educate.</div>
+              <div style={{ marginBottom: '1.2rem' }}>
+                <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', letterSpacing: '-0.02em', color: '#00ff88' }}>
+                  Apps Created
+                </h2>
+                <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+                  {appsCreated.map((app, i) => (
+                    app.active ? (
+                      <a
+                        key={i}
+                        href={app.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{
+                          background: 'rgba(99,102,241,0.2)',
+                          borderRadius: 10, border: '1px solid #00ffff55', color: '#fff',
+                          display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1.1rem', fontWeight: 600,
+                          fontSize: '1.1rem', boxShadow: '0 2px 8px #00ffff33', marginBottom: 4,
+                          textDecoration: 'none', transition: 'all 0.2s', pointerEvents: 'auto'
+                        }}
+                        onMouseEnter={e => {
+                          (e.currentTarget as HTMLElement).style.background = 'rgba(0,255,255,0.2)';
+                          (e.currentTarget as HTMLElement).style.color = '#222';
+                        }}
+                        onMouseLeave={e => {
+                          (e.currentTarget as HTMLElement).style.background = 'rgba(99,102,241,0.2)';
+                          (e.currentTarget as HTMLElement).style.color = '#fff';
+                        }}
+                      >
+                        <span style={{ fontSize: '1.3rem' }}>{app.icon}</span> {app.name}
+                      </a>
+                    ) : (
+                      <span key={i} style={{
+                        background: 'rgba(99,102,241,0.1)',
+                        borderRadius: 10, border: '1px solid #00ffff55', color: '#fff',
+                        display: 'flex', alignItems: 'center', gap: 6, padding: '0.5rem 1.1rem', fontWeight: 600,
+                        fontSize: '1.1rem', opacity: 0.6, marginBottom: 4
+                      }}>
+                        <span style={{ fontSize: '1.3rem' }}>{app.icon}</span> {app.name}
+                      </span>
+                    )
+                  ))}
                 </div>
-                <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '0.9rem', fontWeight: 600, textAlign: 'center', margin: 0 }}>
-                  {app.name}
-                </h3>
-              </a>
+              </div>
+            </div>
+            {/* Screen Glitch Effect */}
+            <div style={{
+              position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,255,0.08) 50%, transparent 100%)',
+              animation: 'screenScan 8s linear infinite', zIndex: 1, pointerEvents: 'none'
+            }} />
+          </div>
+
+          {/* Teclado QWERTY completo, solo JAVIDEV EDU con highlight */}
+          <div style={{ marginTop: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem', perspective: '1000px', zIndex: 11, alignItems: 'center' }}>
+            {[
+              ['Q','W','E','R','T','Y','U','I','O','P'],
+              ['A','S','D','F','G','H','J','K','L'],
+              ['Z','X','C','V','B','N','M']
+            ].map((row, rowIdx) => (
+              <div key={rowIdx} style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
+                {row.map((key, i) => {
+                  const highlight = 'JAVIDEVEDU'.includes(key.replace(' ',''));
+                  if (key === ' ') {
+                    return <div key={i} style={{ width: 44, height: 44, margin: '0 8px' }} />;
+                  }
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        width: 44, height: 44, background: highlight ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#222',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: 6, color: highlight ? 'white' : '#aaa', fontWeight: 700, cursor: highlight ? 'pointer' : 'default',
+                        boxShadow: highlight ? '0 4px 16px #6366f155, inset 0 -2px 8px #222' : '0 2px 4px #111',
+                        transition: 'all 0.1s cubic-bezier(.4,0,.2,1)', transform: 'translateY(0)',
+                        fontSize: '1.1rem',
+                        animation: highlight ? `keyboardBounce ${0.6 + i * 0.08}s ease-in-out infinite` : 'none',
+                        border: highlight ? '2px solid #222' : '1px solid #333',
+                        opacity: rowIdx === 3 && !highlight ? 0 : 1
+                      }}
+                      onMouseEnter={highlight ? e => {
+                        (e.target as HTMLElement).style.transform = 'translateY(7px) scale(1.08)';
+                        (e.target as HTMLElement).style.boxShadow = '0 2px 8px #00ffff99, 0 0 0 2px #00ffff';
+                        (e.target as HTMLElement).style.background = 'linear-gradient(135deg, #00ffff, #6366f1)';
+                        (e.target as HTMLElement).style.color = '#222';
+                      } : undefined}
+                      onMouseLeave={highlight ? e => {
+                        (e.target as HTMLElement).style.transform = 'translateY(0) scale(1)';
+                        (e.target as HTMLElement).style.boxShadow = '0 4px 16px #6366f155, inset 0 -2px 8px #222';
+                        (e.target as HTMLElement).style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
+                        (e.target as HTMLElement).style.color = 'white';
+                      } : undefined}
+                    >
+                      {key}
+                    </div>
+                  );
+                })}
+              </div>
             ))}
           </div>
         </div>
+
+        {/* Scroll down */}
         <div style={{
           position: 'absolute', bottom: '3rem', left: '50%', transform: 'translateX(-50%)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-          color: 'var(--text-tertiary)', fontSize: '0.85rem'
+          color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem', animation: 'bounce 2s infinite', zIndex: 30
         }}>
-          <span>About me</span>
-          <i className="fas fa-chevron-down" style={{ fontSize: '1.5rem' }} />
+          <span>Scroll to explore</span>
+          <i className="fas fa-chevron-down" style={{ fontSize: '1.7rem' }} />
         </div>
+
+        {/* Animaciones */}
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          @keyframes screenGlow {
+            0%, 100% { text-shadow: 0 0 10px #00ff88, 0 0 20px rgba(0,255,255,0.5); }
+            50% { text-shadow: 0 0 20px #00ff88, 0 0 40px rgba(0,255,255,0.8); }
+          }
+          @keyframes screenScan {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+          }
+          @keyframes keyboardBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+          }
+          @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+          }
+          @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(10px); }
+          }
+          @media (max-width: 968px) {
+            .hero-grid { grid-template-columns: 1fr !important; gap: 2rem; }
+          }
+          @media (max-width: 640px) {
+            .hero-grid { gap: 1.5rem; }
+            .hero-grid > div:first-child { height: 400px; }
+          }
+        `}</style>
       </section>
 
       {/* Main 3-Column Layout */}
