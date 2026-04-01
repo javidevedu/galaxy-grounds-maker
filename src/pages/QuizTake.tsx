@@ -210,8 +210,8 @@ export default function QuizTake() {
       <Card className="w-full max-w-md text-center">
         <CardContent className="py-12 space-y-4">
           <AlertTriangle className="w-16 h-16 mx-auto text-destructive" />
-          <h2 className="text-2xl font-heading font-bold">Quiz Closed</h2>
-          <p className="text-muted-foreground">Quiz closed due to academic integrity violation.</p>
+          <h2 className="text-2xl font-heading font-bold">Test Closed</h2>
+          <p className="text-muted-foreground">Test closed due to academic integrity violation.</p>
         </CardContent>
       </Card>
     </div>
