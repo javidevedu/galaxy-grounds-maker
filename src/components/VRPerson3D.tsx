@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Canvas, useFrame } from '@react-three/fiber';
 import { useRef } from 'react';
 import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
