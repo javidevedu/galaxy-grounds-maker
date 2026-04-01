@@ -125,9 +125,9 @@ export default function AdminDashboard() {
 
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-heading font-bold">Quizzes</h2>
+          <h2 className="text-2xl font-heading font-bold">Tests</h2>
           <Button onClick={() => setShowCreate(!showCreate)}>
-            <Plus className="w-4 h-4 mr-1" /> New Quiz
+            <Plus className="w-4 h-4 mr-1" /> New Test
           </Button>
         </div>
 
