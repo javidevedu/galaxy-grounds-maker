@@ -17,12 +17,6 @@ import TravelRecommendation from "./pages/projects/TravelRecommendation";
 import JavidevSite from "./pages/projects/JavidevSite";
 import WhatToBuy from "./pages/projects/WhatToBuy";
 import JVLuxe from "./pages/projects/JVLuxe";
-import PBLIndex from "./pages/PBLIndex";
-import PBLAdmin from "./pages/PBLAdmin";
-import PBLAdminResults from "./pages/PBLAdminResults";
-import PBLStart from "./pages/PBLStart";
-import PBLChat from "./pages/PBLChat";
-import PBLSessionResults from "./pages/PBLSessionResults";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,13 +37,6 @@ const App = () => (
             <Route path="/LantestAI/admin/quiz/:quizId" element={<AdminQuizDetail />} />
             <Route path="/LantestAI/quiz/:quizId" element={<QuizStart />} />
             <Route path="/LantestAI/quiz/:quizId/take/:attemptId" element={<QuizTake />} />
-            <Route path="/PBL" element={<PBLIndex />} />
-            <Route path="/PBL/admin/login" element={<AdminLogin />} />
-            <Route path="/PBL/admin" element={<PBLAdmin />} />
-            <Route path="/PBL/admin/results" element={<PBLAdminResults />} />
-            <Route path="/PBL/activity/:activityId" element={<PBLStart />} />
-            <Route path="/PBL/chat/:sessionId" element={<PBLChat />} />
-            <Route path="/PBL/results/:sessionId" element={<PBLSessionResults />} />
             <Route path="/projects/book-review" element={<BookReview />} />
             <Route path="/projects/travel-recommendation" element={<TravelRecommendation />} />
             <Route path="/projects/javidev-site" element={<JavidevSite />} />

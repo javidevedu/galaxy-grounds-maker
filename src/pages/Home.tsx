@@ -10,14 +10,9 @@ const appsCreated = [
     active: true,
     icon: '🧠',
   },
-  {
-    name: 'PBL English',
-    description: 'Problem-Based Learning platform with AI companion for interactive English practice.',
-    href: '/PBL',
-    active: true,
-    icon: '💬',
-  },
+  { name: 'Coming Soon', description: 'A new AI-powered tool is on its way.', active: false, icon: '🚀' },
   { name: 'Coming Soon', description: 'Another app coming to the JaviDevEdu ecosystem.', active: false, icon: '💡' },
+  
 ];
 
 export default function Home() {
