@@ -72,7 +72,11 @@ const SVGPersonFollow = () => {
       const dy = e.clientY - headCenter.y;
       // Limitar el rango de movimiento para simular un óvalo (no 360°)
       // X: izquierda-derecha (horizontal), Y: arriba-abajo (vertical)
+      // Si el mouse está a la izquierda, la cabeza mira a la izquierda; si está a la derecha, mira a la derecha
       let angleY = Math.max(-15, Math.min(15, dx / 16)); // -15° a 15°
+      // Invertir el ángulo si el mouse está a la izquierda del centro
+      if (dx < 0) angleY = Math.max(-15, Math.min(0, dx / 16));
+      if (dx > 0) angleY = Math.min(15, Math.max(0, dx / 16));
       let angleX = Math.max(-8, Math.min(8, dy / 30)); // -8° a 8°
       setAngle({ x: angleX, y: angleY });
     }
