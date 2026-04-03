@@ -45,30 +45,41 @@ const PersonSVG = ({ headAngle = 0 }) => (
 );
 
 // Wrapper that tracks mouse and rotates head
+
 const SVGPersonFollow = () => {
-  const ref = useRef(null);
   const [angle, setAngle] = React.useState(0);
+  // Centro de la cabeza en la pantalla (ajustar según posición SVG)
+  const svgWidth = 180;
+  const svgHeight = 270;
+  const svgRight = 32;
+  const svgTop = 32;
+  const headCenter = {
+    x: window.innerWidth - svgRight - svgWidth / 2 + (195 - 200) * (svgWidth / 400),
+    y: svgTop + (170 * (svgHeight / 600)),
+  };
 
   useEffect(() => {
     function handleMouseMove(e) {
-      const svgCenter = { x: 195, y: 170 };
-      const rect = ref.current?.getBoundingClientRect();
-      if (!rect) return;
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-      // Calculate angle from head center to mouse
-      const dx = mouseX - svgCenter.x * (rect.width / 400);
-      const dy = mouseY - svgCenter.y * (rect.height / 600);
-      const rad = Math.atan2(dy, dx);
-      setAngle((rad * 180) / Math.PI / 2); // scale for subtlety
+      // Calcular ángulo desde el centro de la cabeza hasta el mouse
+      const dx = e.clientX - headCenter.x;
+      const dy = e.clientY - headCenter.y;
+      let rad = Math.atan2(dy, dx);
+      let deg = (rad * 180) / Math.PI;
+      // Limitar el ángulo de giro (por ejemplo, -40 a 40 grados)
+      const maxAngle = 40;
+      if (deg > maxAngle) deg = maxAngle;
+      if (deg < -maxAngle) deg = -maxAngle;
+      // Si el mouse está muy atrás, no girar la cabeza al revés
+      if (Math.abs(deg) > maxAngle) deg = deg > 0 ? maxAngle : -maxAngle;
+      setAngle(deg);
     }
-    const node = ref.current;
-    if (node) node.addEventListener('mousemove', handleMouseMove);
-    return () => node && node.removeEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+    // eslint-disable-next-line
   }, []);
 
   return (
-    <div ref={ref} style={{ position: 'absolute', top: 32, right: 32, zIndex: 50, cursor: 'pointer', userSelect: 'none' }}>
+    <div style={{ position: 'absolute', top: svgTop, right: svgRight, zIndex: 50, cursor: 'pointer', userSelect: 'none' }}>
       <PersonSVG headAngle={angle} />
     </div>
   );

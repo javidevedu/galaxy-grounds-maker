@@ -56,8 +56,6 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Marker Board BG - Removed */}
-
       {/* Hero - VR on Monitor Scene */}
       <section style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
