@@ -217,7 +217,7 @@ export default function PBLAdmin() {
                     onClick={() => togglePublish(a.id, a.is_published)}
                     title={a.is_published ? 'Unpublish' : 'Publish'}
                   >
-                    {a.is_published ? <Eye className="w-4 h-4 text-green-500" /> : <EyeOff className="w-4 h-4" />}
+                    {a.is_published ? <Eye className="w-4 h-4 text-primary" /> : <EyeOff className="w-4 h-4" />}
                   </Button>
                   <Button variant="ghost" size="icon" onClick={() => deleteActivity(a.id)}>
                     <Trash2 className="w-4 h-4 text-destructive" />
