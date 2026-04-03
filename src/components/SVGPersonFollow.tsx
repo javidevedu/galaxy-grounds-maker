@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 
 // SVG as a React component
-const PersonSVG = ({ headAngle = 0 }) => (
+const PersonSVG = ({ headAngleX = 0, headAngleY = 0 }) => (
   <svg viewBox="0 0 400 600" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width: 180, height: 270 }}>
     {/* Piernas */}
     <path d="M210 400l20 130h30l-20-130z" fill="#2D3748"/>
@@ -26,8 +26,12 @@ const PersonSVG = ({ headAngle = 0 }) => (
     <path d="M235 315l40 45 25-10-40-45z" fill="#1A202C"/>
     <path d="M275 360l25 30 25-10-25-30z" fill="#FFDBAC"/>
     <circle cx="310" cy="380" r="18" fill="#fff" stroke="#E5E7EB"/>
-    {/* Cabeza y Visor (rotada) */}
-    <g style={{ transform: `rotate(${headAngle}deg)`, transformOrigin: '195px 170px' }}>
+    {/* Cabeza y Visor (rotada en X e Y) */}
+    <g style={{
+      transform: `rotateY(${headAngleY}deg) rotateZ(${headAngleX}deg)`,
+      transformOrigin: '195px 170px',
+      transition: 'transform 0.1s',
+    }}>
       <circle cx="195" cy="170" r="60" fill="#FFDBAC"/>
       <path d="M140 150q-2-30 15-45l15-20 15 15 20-25 15 20 25-15 10 30-5 40q0 10-15 10t-20-10q-5 10-25 10t-25-10q-5 10-15 10t-10-10q0-10 0-10z" fill="#5D4037"/>
       <path d="M195 185q5 5 0 10" stroke="#D2B48C" strokeWidth="2" fill="none" strokeLinecap="round"/>
@@ -47,40 +51,38 @@ const PersonSVG = ({ headAngle = 0 }) => (
 // Wrapper that tracks mouse and rotates head
 
 const SVGPersonFollow = () => {
-  const [angle, setAngle] = React.useState(0);
+  const [angle, setAngle] = React.useState({ x: 0, y: 0 });
   // Centro de la cabeza en la pantalla (ajustar según posición SVG)
   const svgWidth = 180;
   const svgHeight = 270;
   const svgRight = 32;
   const svgTop = 32;
-  const headCenter = {
-    x: window.innerWidth - svgRight - svgWidth / 2 + (195 - 200) * (svgWidth / 400),
-    y: svgTop + (170 * (svgHeight / 600)),
-  };
+
+  function getHeadCenter() {
+    return {
+      x: window.innerWidth - svgRight - svgWidth / 2 + (195 - 200) * (svgWidth / 400),
+      y: svgTop + (170 * (svgHeight / 600)),
+    };
+  }
 
   useEffect(() => {
     function handleMouseMove(e) {
-      // Calcular ángulo desde el centro de la cabeza hasta el mouse
+      const headCenter = getHeadCenter();
       const dx = e.clientX - headCenter.x;
       const dy = e.clientY - headCenter.y;
-      let rad = Math.atan2(dy, dx);
-      let deg = (rad * 180) / Math.PI;
-      // Limitar el ángulo de giro (por ejemplo, -40 a 40 grados)
-      const maxAngle = 40;
-      if (deg > maxAngle) deg = maxAngle;
-      if (deg < -maxAngle) deg = -maxAngle;
-      // Si el mouse está muy atrás, no girar la cabeza al revés
-      if (Math.abs(deg) > maxAngle) deg = deg > 0 ? maxAngle : -maxAngle;
-      setAngle(deg);
+      // Limitar el rango de movimiento para simular un óvalo (no 360°)
+      // X: izquierda-derecha (horizontal), Y: arriba-abajo (vertical)
+      let angleY = Math.max(-35, Math.min(35, dx / 8)); // -35° a 35°
+      let angleX = Math.max(-20, Math.min(20, dy / 12)); // -20° a 20°
+      setAngle({ x: angleX, y: angleY });
     }
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-    // eslint-disable-next-line
   }, []);
 
   return (
     <div style={{ position: 'absolute', top: svgTop, right: svgRight, zIndex: 50, cursor: 'pointer', userSelect: 'none' }}>
-      <PersonSVG headAngle={angle} />
+      <PersonSVG headAngleX={angle.x} headAngleY={angle.y} />
     </div>
   );
 };
