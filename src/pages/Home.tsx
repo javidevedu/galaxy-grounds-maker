@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import SVGPersonFollow from '../components/SVGPersonFollow';
 import { Link } from 'react-router-dom';
 
 const appsCreated = [
@@ -33,7 +34,9 @@ export default function Home() {
   // ...existing code...
 
   return (
-    <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+    <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", position: 'relative' }}>
+      {/* Personaje SVG en la esquina superior derecha */}
+      <SVGPersonFollow />
       <style>{`
         :root {
           --bg-primary: #fafafa;
