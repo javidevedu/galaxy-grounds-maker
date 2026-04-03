@@ -30,35 +30,7 @@ export default function Home() {
     return () => observerRef.current?.disconnect();
   }, []);
 
-  const vrHeadRef = useRef<HTMLDivElement>(null);
-  const rayRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    // VR head following cursor
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!vrHeadRef.current || !rayRef.current) return;
-      
-      const rect = vrHeadRef.current.getBoundingClientRect();
-      const eyeX = rect.left + rect.width / 2;
-      const eyeY = rect.top + rect.height / 2;
-      
-      const angle = Math.atan2(e.clientY - eyeY, e.clientX - eyeX);
-      const distance = Math.hypot(e.clientX - eyeX, e.clientY - eyeY);
-      
-      // Rotate head slightly
-      const headRotation = (e.clientX - window.innerWidth / 2) * 0.02;
-      vrHeadRef.current.style.transform = `rotateY(${headRotation}deg) rotateZ(${(e.clientY - window.innerHeight / 2) * 0.01}deg)`;
-      
-      // Draw ray from eyes to cursor
-      rayRef.current.style.left = `${eyeX}px`;
-      rayRef.current.style.top = `${eyeY}px`;
-      rayRef.current.style.width = `${Math.min(distance, 800)}px`;
-      rayRef.current.style.transform = `rotate(${angle}rad)`;
-    };
-    
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
+  // ...existing code...
 
   return (
     <div style={{ fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
@@ -97,47 +69,10 @@ export default function Home() {
           animation: 'gridMove 20s linear infinite', zIndex: 0
         }} />
 
-        {/* Ray from Eyes */}
-        <div ref={rayRef} style={{
-          position: 'fixed', height: 3, background: 'linear-gradient(90deg, #00ffff, transparent)',
-          pointerEvents: 'none', zIndex: 20, transformOrigin: 'left center'
-        }} />
+        {/* Ray from Eyes eliminado para aligerar la página */}
 
-        {/* Monitor + VR Person + Keyboard */}
+        {/* Monitor grande y contenido hero */}
         <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 60 }}>
-          {/* Persona VR sentada en 3D sobre el monitor */}
-          <div style={{ position: 'absolute', top: -160, left: '50%', transform: 'translateX(-50%)', zIndex: 12, display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
-            {/* Piernas */}
-            <div style={{ display: 'flex', gap: 10, marginBottom: -18, zIndex: 1 }}>
-              <div style={{ width: 18, height: 60, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(18deg)', border: '2px solid #222' }} />
-              <div style={{ width: 18, height: 60, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(-18deg)', border: '2px solid #222' }} />
-            </div>
-            {/* Cuerpo y brazos */}
-            <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', zIndex: 2 }}>
-              {/* Cuerpo */}
-              <div style={{ width: 38, height: 70, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 20, boxShadow: '0 8px 24px #6366f155', marginBottom: -8, border: '2px solid #222', position: 'relative', zIndex: 2 }} />
-              {/* Brazos */}
-              <div style={{ position: 'absolute', top: 30, left: -32, display: 'flex', gap: 60, width: 100, height: 40, zIndex: 1 }}>
-                <div style={{ width: 18, height: 48, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(30deg)', border: '2px solid #222' }} />
-                <div style={{ width: 18, height: 48, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 16, boxShadow: '0 4px 12px #6366f155', transform: 'rotate(-30deg)', border: '2px solid #222' }} />
-              </div>
-            </div>
-            {/* Cabeza con VR, sigue el mouse */}
-            <div ref={vrHeadRef} style={{
-              width: 80, height: 80, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: '50%',
-              boxShadow: '0 8px 32px #6366f199, 0 0 0 8px #1a1a2e', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'transform 0.05s ease-out', zIndex: 3, marginTop: -110, border: '2.5px solid #222'
-            }}>
-              {/* VR Glasses */}
-              <div style={{ position: 'absolute', top: 28, left: 10, width: 60, height: 24, background: 'linear-gradient(90deg, #00ffff 60%, #6366f1 100%)', borderRadius: 12, boxShadow: '0 0 16px #00ffff99', border: '2px solid #00ffff88', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 22, color: '#222', fontWeight: 700, marginRight: 4 }}>👓</span>
-              </div>
-              {/* Nariz */}
-              <div style={{ position: 'absolute', top: 48, left: 36, width: 8, height: 12, background: '#222', borderRadius: 6, opacity: 0.18 }} />
-            </div>
-          </div>
-
-          {/* Monitor grande */}
           <div style={{
             width: 480, height: 320, background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
             border: '12px solid #2a2a4e', borderRadius: 18,
@@ -204,54 +139,6 @@ export default function Home() {
               position: 'absolute', inset: 0, background: 'linear-gradient(90deg, transparent 0%, rgba(0,255,255,0.08) 50%, transparent 100%)',
               animation: 'screenScan 8s linear infinite', zIndex: 1, pointerEvents: 'none'
             }} />
-          </div>
-
-          {/* Teclado QWERTY completo, solo JAVIDEV EDU con highlight */}
-          <div style={{ marginTop: 0, display: 'flex', flexDirection: 'column', gap: '0.25rem', perspective: '1000px', zIndex: 11, alignItems: 'center' }}>
-            {[
-              ['Q','W','E','R','T','Y','U','I','O','P'],
-              ['A','S','D','F','G','H','J','K','L'],
-              ['Z','X','C','V','B','N','M']
-            ].map((row, rowIdx) => (
-              <div key={rowIdx} style={{ display: 'flex', gap: '0.25rem', justifyContent: 'center' }}>
-                {row.map((key, i) => {
-                  const highlight = 'JAVIDEVEDU'.includes(key.replace(' ',''));
-                  if (key === ' ') {
-                    return <div key={i} style={{ width: 44, height: 44, margin: '0 8px' }} />;
-                  }
-                  return (
-                    <div
-                      key={i}
-                      style={{
-                        width: 44, height: 44, background: highlight ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : '#222',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        borderRadius: 6, color: highlight ? 'white' : '#aaa', fontWeight: 700, cursor: highlight ? 'pointer' : 'default',
-                        boxShadow: highlight ? '0 4px 16px #6366f155, inset 0 -2px 8px #222' : '0 2px 4px #111',
-                        transition: 'all 0.1s cubic-bezier(.4,0,.2,1)', transform: 'translateY(0)',
-                        fontSize: '1.1rem',
-                        animation: highlight ? `keyboardBounce ${0.6 + i * 0.08}s ease-in-out infinite` : 'none',
-                        border: highlight ? '2px solid #222' : '1px solid #333',
-                        opacity: rowIdx === 3 && !highlight ? 0 : 1
-                      }}
-                      onMouseEnter={highlight ? e => {
-                        (e.target as HTMLElement).style.transform = 'translateY(7px) scale(1.08)';
-                        (e.target as HTMLElement).style.boxShadow = '0 2px 8px #00ffff99, 0 0 0 2px #00ffff';
-                        (e.target as HTMLElement).style.background = 'linear-gradient(135deg, #00ffff, #6366f1)';
-                        (e.target as HTMLElement).style.color = '#222';
-                      } : undefined}
-                      onMouseLeave={highlight ? e => {
-                        (e.target as HTMLElement).style.transform = 'translateY(0) scale(1)';
-                        (e.target as HTMLElement).style.boxShadow = '0 4px 16px #6366f155, inset 0 -2px 8px #222';
-                        (e.target as HTMLElement).style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
-                        (e.target as HTMLElement).style.color = 'white';
-                      } : undefined}
-                    >
-                      {key}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
           </div>
         </div>
 
