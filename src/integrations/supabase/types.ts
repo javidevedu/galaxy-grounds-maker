@@ -109,6 +109,121 @@ export type Database = {
           },
         ]
       }
+      pbl_activities: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          grammar_topics: string
+          id: string
+          is_published: boolean
+          knowledge_area: string
+          mcer_level: string
+          skills: string[]
+          time_limit_minutes: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          grammar_topics?: string
+          id?: string
+          is_published?: boolean
+          knowledge_area?: string
+          mcer_level?: string
+          skills?: string[]
+          time_limit_minutes?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          grammar_topics?: string
+          id?: string
+          is_published?: boolean
+          knowledge_area?: string
+          mcer_level?: string
+          skills?: string[]
+          time_limit_minutes?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      pbl_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pbl_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "pbl_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pbl_sessions: {
+        Row: {
+          activity_id: string
+          detailed_feedback: Json | null
+          finished_at: string | null
+          id: string
+          is_completed: boolean
+          score: number | null
+          started_at: string
+          student_id: string
+          student_name: string
+        }
+        Insert: {
+          activity_id: string
+          detailed_feedback?: Json | null
+          finished_at?: string | null
+          id?: string
+          is_completed?: boolean
+          score?: number | null
+          started_at?: string
+          student_id: string
+          student_name: string
+        }
+        Update: {
+          activity_id?: string
+          detailed_feedback?: Json | null
+          finished_at?: string | null
+          id?: string
+          is_completed?: boolean
+          score?: number | null
+          started_at?: string
+          student_id?: string
+          student_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pbl_sessions_activity_id_fkey"
+            columns: ["activity_id"]
+            isOneToOne: false
+            referencedRelation: "pbl_activities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       questions: {
         Row: {
           audio_script: string | null
