@@ -103,11 +103,9 @@ export default function Home() {
                 <div style={{ display: 'flex', gap: '0.7rem', flexWrap: 'wrap', justifyContent: 'center' }}>
                   {appsCreated.map((app, i) => (
                     app.active ? (
-                      <a
+                      <Link
                         key={i}
-                        href={app.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        to={app.href!}
                         style={{
                           background: 'rgba(99,102,241,0.2)',
                           borderRadius: 10, border: '1px solid #00ffff55', color: '#fff',
@@ -125,7 +123,7 @@ export default function Home() {
                         }}
                       >
                         <span style={{ fontSize: '1.3rem' }}>{app.icon}</span> {app.name}
-                      </a>
+                      </Link>
                     ) : (
                       <span key={i} style={{
                         background: 'rgba(99,102,241,0.1)',
