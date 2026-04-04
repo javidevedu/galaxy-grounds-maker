@@ -220,7 +220,7 @@ export default function PBLChat() {
           </div>
         );
       }
-      return <ReactMarkdown key={i} className="prose prose-sm max-w-none dark:prose-invert">{part}</ReactMarkdown>;
+      return <div key={i} className="prose prose-sm max-w-none dark:prose-invert"><ReactMarkdown>{part}</ReactMarkdown></div>;
     });
   };
 
