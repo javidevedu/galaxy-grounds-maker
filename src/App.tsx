@@ -12,6 +12,12 @@ import AdminResults from "./pages/AdminResults";
 import AdminQuizDetail from "./pages/AdminQuizDetail";
 import QuizStart from "./pages/QuizStart";
 import QuizTake from "./pages/QuizTake";
+import PBLIndex from "./pages/PBLIndex";
+import PBLAdminLogin from "./pages/PBLAdminLogin";
+import PBLAdminResults from "./pages/PBLAdminResults";
+import PBLStart from "./pages/PBLStart";
+import PBLChat from "./pages/PBLChat";
+import PBLResults from "./pages/PBLResults";
 import BookReview from "./pages/projects/BookReview";
 import TravelRecommendation from "./pages/projects/TravelRecommendation";
 import JavidevSite from "./pages/projects/JavidevSite";
@@ -37,6 +43,12 @@ const App = () => (
             <Route path="/LantestAI/admin/quiz/:quizId" element={<AdminQuizDetail />} />
             <Route path="/LantestAI/quiz/:quizId" element={<QuizStart />} />
             <Route path="/LantestAI/quiz/:quizId/take/:attemptId" element={<QuizTake />} />
+            <Route path="/pbl/admin/login" element={<PBLAdminLogin />} />
+            <Route path="/pbl/admin" element={<PBLIndex />} />
+            <Route path="/pbl/admin/results" element={<PBLAdminResults />} />
+            <Route path="/pbl/activity/:activityId" element={<PBLStart />} />
+            <Route path="/pbl/activity/:activityId/chat/:sessionId" element={<PBLChat />} />
+            <Route path="/pbl/activity/:activityId/results/:sessionId" element={<PBLResults />} />
             <Route path="/projects/book-review" element={<BookReview />} />
             <Route path="/projects/travel-recommendation" element={<TravelRecommendation />} />
             <Route path="/projects/javidev-site" element={<JavidevSite />} />

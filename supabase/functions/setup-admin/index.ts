@@ -16,39 +16,44 @@ serve(async (req) => {
       auth: { autoRefreshToken: false, persistSession: false }
     });
 
-    // Check if admin already exists
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const adminEmail = "2@admin.local";
-    const existing = existingUsers?.users?.find(u => u.email === adminEmail);
+    const admins = [
+      { email: "2@admin.local", password: "22" },
+      { email: "3@admin.local", password: "333" },
+    ];
 
-    if (existing) {
-      // Ensure role exists
-      await supabase.from("user_roles").upsert({
-        user_id: existing.id,
-        role: "admin",
-      }, { onConflict: "user_id,role" });
-      
-      return new Response(JSON.stringify({ message: "Admin already exists", email: adminEmail }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const results: string[] = [];
+
+    for (const admin of admins) {
+      const existing = existingUsers?.users?.find(u => u.email === admin.email);
+
+      if (existing) {
+        await supabase.from("user_roles").upsert({
+          user_id: existing.id,
+          role: "admin",
+        }, { onConflict: "user_id,role" });
+        results.push(`${admin.email}: already exists`);
+      } else {
+        const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
+          email: admin.email,
+          password: admin.password,
+          email_confirm: true,
+        });
+
+        if (createError) {
+          results.push(`${admin.email}: error - ${createError.message}`);
+          continue;
+        }
+
+        await supabase.from("user_roles").insert({
+          user_id: newUser.user.id,
+          role: "admin",
+        });
+        results.push(`${admin.email}: created`);
+      }
     }
 
-    // Create admin user
-    const { data: newUser, error: createError } = await supabase.auth.admin.createUser({
-      email: adminEmail,
-      password: "22",
-      email_confirm: true,
-    });
-
-    if (createError) throw createError;
-
-    // Assign admin role
-    await supabase.from("user_roles").insert({
-      user_id: newUser.user.id,
-      role: "admin",
-    });
-
-    return new Response(JSON.stringify({ message: "Admin created", email: adminEmail }), {
+    return new Response(JSON.stringify({ results }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (e) {
