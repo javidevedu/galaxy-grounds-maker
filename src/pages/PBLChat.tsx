@@ -15,7 +15,8 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 export default function PBLChat() {
   const { activityId, sessionId } = useParams();
   const navigate = useNavigate();
-  const [activity, setActivity] = useState<Tables<'pbl_activities'> | null>(null);
+  const [activity, setActivity] = useState<any>(null);
+  const [studentName, setStudentName] = useState('');
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
@@ -63,8 +64,8 @@ export default function PBLChat() {
       return;
     }
 
-    setActivity(actRes.data);
-    setStartTime(new Date(sessRes.data.started_at));
+    setActivity({ ...actRes.data, student_name: sessRes.data.student_name });
+    setStudentName(sessRes.data.student_name);
 
     if (sessRes.data.is_completed) {
       setFinished(true);
