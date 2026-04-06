@@ -30,7 +30,7 @@ export default function PBLCreateForm({ onSubmit, creating }: Props) {
   const [title, setTitle] = useState('');
   const [mcerLevel, setMcerLevel] = useState('A2');
   const [knowledgeArea, setKnowledgeArea] = useState('');
-  const [grammarTopics, setGrammarTopics] = useState('');
+  const [grammarTopics, setGrammarTopics] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>(['reading', 'writing', 'listening']);
   const [timeLimit, setTimeLimit] = useState(30);
 
