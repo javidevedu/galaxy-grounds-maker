@@ -44,7 +44,7 @@ export default function PBLCreateForm({ onSubmit, creating }: Props) {
       title,
       mcer_level: mcerLevel,
       knowledge_area: knowledgeArea,
-      grammar_topics: grammarTopics,
+      grammar_topics: grammarTopics.join(', '),
       skills,
       time_limit_minutes: timeLimit,
     });
