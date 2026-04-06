@@ -5,14 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home } from 'lucide-react';
+import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home, Users } from 'lucide-react';
 
 interface Feedback {
   score: number;
-  grammar: { score: number; errors: string[]; feedback: string };
+  grammar: { score: number; errors: string[]; correct_usage?: string[]; feedback: string };
   vocabulary: { score: number; strengths: string[]; weaknesses: string[]; feedback: string };
   comprehension: { score: number; feedback: string };
   communication: { score: number; feedback: string };
+  participation?: { score: number; feedback: string };
   overall_feedback: string;
   recommendations: string[];
 }
@@ -78,6 +79,7 @@ export default function PBLResults() {
             { title: 'Vocabulary', icon: BookOpen, data: feedback.vocabulary },
             { title: 'Comprehension', icon: Headphones, data: feedback.comprehension },
             { title: 'Communication', icon: MessageSquare, data: feedback.communication },
+            ...(feedback.participation ? [{ title: 'Participation', icon: Users, data: feedback.participation }] : []),
           ].map(({ title, icon: Icon, data }) => (
             <Card key={title}>
               <CardHeader className="pb-2">
@@ -98,11 +100,27 @@ export default function PBLResults() {
                     </ul>
                   </div>
                 )}
+                {'correct_usage' in data && (data as any).correct_usage?.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs font-semibold text-green-600 mb-1">Correct usage:</p>
+                    <ul className="text-xs text-muted-foreground list-disc pl-4">
+                      {(data as any).correct_usage.map((e: string, i: number) => <li key={i}>{e}</li>)}
+                    </ul>
+                  </div>
+                )}
                 {'strengths' in data && (data as any).strengths?.length > 0 && (
                   <div className="mt-2">
                     <p className="text-xs font-semibold text-green-600 mb-1">Strengths:</p>
                     <ul className="text-xs text-muted-foreground list-disc pl-4">
                       {(data as any).strengths.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {'weaknesses' in data && (data as any).weaknesses?.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs font-semibold text-destructive mb-1">Areas to improve:</p>
+                    <ul className="text-xs text-muted-foreground list-disc pl-4">
+                      {(data as any).weaknesses.map((s: string, i: number) => <li key={i}>{s}</li>)}
                     </ul>
                   </div>
                 )}

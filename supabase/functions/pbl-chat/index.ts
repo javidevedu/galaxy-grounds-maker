@@ -29,30 +29,77 @@ serve(async (req) => {
 
       const conversation = (messages || []).map((m: any) => `${m.role}: ${m.content}`).join("\n");
 
-      const evalPrompt = `You are an expert English teacher evaluating a student's performance in a Problem-Based Learning activity.
+      const totalStudentMessages = (messages || []).filter((m: any) => m.role === "user").length;
+      const totalAssistantMessages = (messages || []).filter((m: any) => m.role === "assistant").length;
+      const studentResponses = (messages || []).filter((m: any) => m.role === "user").map((m: any) => m.content);
+      const avgResponseLength = studentResponses.length > 0 
+        ? Math.round(studentResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0) / studentResponses.length) 
+        : 0;
+
+      const evalPrompt = `You are an expert English teacher evaluating a student's performance in a Problem-Based Learning activity. You must be FAIR and ACCURATE in your scoring.
 
 Activity details:
 - Title: ${activity.title}
 - CEFR Level: ${activity.mcer_level}
 - Knowledge Area: ${activity.knowledge_area}
-- Grammar Topics: ${activity.grammar_topics}
+- Grammar Topics that should have been practiced: ${activity.grammar_topics}
 - Skills evaluated: ${activity.skills?.join(", ")}
+
+STATISTICS:
+- Total student messages: ${totalStudentMessages}
+- Total AI messages: ${totalAssistantMessages}
+- Average student response length: ${avgResponseLength} words
 
 Here is the complete conversation:
 ${conversation}
 
-Evaluate the student and return ONLY valid JSON (no markdown) with this structure:
+EVALUATION INSTRUCTIONS:
+1. CAREFULLY analyze EACH student response for grammar errors, vocabulary usage, and comprehension.
+2. Count specific errors — list every grammar mistake with what the student wrote vs. what was correct.
+3. Assess PARTICIPATION QUALITY:
+   - Did the student give thoughtful, complete responses or just short/minimal answers?
+   - Did the student engage with the problem and try to solve it?
+   - Did the student use the target grammar topics (${activity.grammar_topics})?
+4. For SCORING, follow this rubric:
+   - 90-100: Excellent — very few errors, strong participation, used target grammar correctly, solved the problem effectively
+   - 75-89: Good — some errors but generally correct, decent participation, attempted target grammar
+   - 60-74: Acceptable — frequent errors, minimal participation, limited use of target grammar
+   - 40-59: Below expectations — many errors, very short responses, barely engaged with the problem
+   - 0-39: Poor — did not participate meaningfully, constant errors, no attempt at target grammar
+5. If the student barely participated (very few messages, one-word answers, off-topic), the score MUST reflect that (below 50).
+6. If the student made many grammar errors in the target topics, reduce the grammar score accordingly.
+7. Be HONEST — do not inflate scores. A student who made 10 grammar errors should NOT get 90% in grammar.
+
+Return ONLY valid JSON (no markdown) with this structure:
 {
   "score": 0-100,
-  "grammar": { "score": 0-100, "errors": ["list of specific errors"], "feedback": "detailed feedback" },
-  "vocabulary": { "score": 0-100, "strengths": ["words used well"], "weaknesses": ["areas to improve"], "feedback": "detailed feedback" },
-  "comprehension": { "score": 0-100, "feedback": "how well they understood reading and listening tasks" },
-  "communication": { "score": 0-100, "feedback": "how effectively they communicated to solve the problem" },
-  "overall_feedback": "A comprehensive paragraph as a teacher would write, with encouragement and specific advice",
-  "recommendations": ["specific study recommendations"]
-}
-
-Score based on CORRECT usage (positive scoring), not penalties. Be encouraging but honest.`;
+  "grammar": { 
+    "score": 0-100, 
+    "errors": ["Student wrote: '...' → Correct: '...'  (rule: ...)"], 
+    "correct_usage": ["examples of correct grammar the student used"],
+    "feedback": "detailed feedback about grammar performance" 
+  },
+  "vocabulary": { 
+    "score": 0-100, 
+    "strengths": ["specific words/phrases used well"], 
+    "weaknesses": ["areas where vocabulary was limited or incorrect"], 
+    "feedback": "detailed feedback" 
+  },
+  "comprehension": { 
+    "score": 0-100, 
+    "feedback": "did the student understand the questions and instructions? Give specific examples" 
+  },
+  "communication": { 
+    "score": 0-100, 
+    "feedback": "how effectively did they communicate? Were responses complete? Did they engage with the problem?" 
+  },
+  "participation": {
+    "score": 0-100,
+    "feedback": "quality and quantity of participation — did the student actively engage or give minimal effort?"
+  },
+  "overall_feedback": "A comprehensive, honest paragraph as a teacher would write. Mention specific strengths AND weaknesses with examples from the conversation. Give concrete advice.",
+  "recommendations": ["specific, actionable study recommendations based on observed weaknesses"]
+}`;
 
       const evalResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
