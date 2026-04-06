@@ -79,6 +79,7 @@ export default function PBLResults() {
             { title: 'Vocabulary', icon: BookOpen, data: feedback.vocabulary },
             { title: 'Comprehension', icon: Headphones, data: feedback.comprehension },
             { title: 'Communication', icon: MessageSquare, data: feedback.communication },
+            ...(feedback.participation ? [{ title: 'Participation', icon: Users, data: feedback.participation }] : []),
           ].map(({ title, icon: Icon, data }) => (
             <Card key={title}>
               <CardHeader className="pb-2">
