@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import TopicSelector from '@/components/admin/TopicSelector';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,7 +30,7 @@ export default function PBLCreateForm({ onSubmit, creating }: Props) {
   const [title, setTitle] = useState('');
   const [mcerLevel, setMcerLevel] = useState('A2');
   const [knowledgeArea, setKnowledgeArea] = useState('');
-  const [grammarTopics, setGrammarTopics] = useState('');
+  const [grammarTopics, setGrammarTopics] = useState<string[]>([]);
   const [skills, setSkills] = useState<string[]>(['reading', 'writing', 'listening']);
   const [timeLimit, setTimeLimit] = useState(30);
 
@@ -43,7 +44,7 @@ export default function PBLCreateForm({ onSubmit, creating }: Props) {
       title,
       mcer_level: mcerLevel,
       knowledge_area: knowledgeArea,
-      grammar_topics: grammarTopics,
+      grammar_topics: grammarTopics.join(', '),
       skills,
       time_limit_minutes: timeLimit,
     });
@@ -86,7 +87,7 @@ export default function PBLCreateForm({ onSubmit, creating }: Props) {
 
           <div className="space-y-2">
             <Label>Grammar Topics</Label>
-            <Input value={grammarTopics} onChange={e => setGrammarTopics(e.target.value)} placeholder="Present Perfect, Conditionals..." required />
+            <TopicSelector selected={grammarTopics} onChange={setGrammarTopics} />
           </div>
 
           <div className="space-y-2">
