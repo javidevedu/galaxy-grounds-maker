@@ -100,11 +100,27 @@ export default function PBLResults() {
                     </ul>
                   </div>
                 )}
+                {'correct_usage' in data && (data as any).correct_usage?.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs font-semibold text-green-600 mb-1">Correct usage:</p>
+                    <ul className="text-xs text-muted-foreground list-disc pl-4">
+                      {(data as any).correct_usage.map((e: string, i: number) => <li key={i}>{e}</li>)}
+                    </ul>
+                  </div>
+                )}
                 {'strengths' in data && (data as any).strengths?.length > 0 && (
                   <div className="mt-2">
                     <p className="text-xs font-semibold text-green-600 mb-1">Strengths:</p>
                     <ul className="text-xs text-muted-foreground list-disc pl-4">
                       {(data as any).strengths.map((s: string, i: number) => <li key={i}>{s}</li>)}
+                    </ul>
+                  </div>
+                )}
+                {'weaknesses' in data && (data as any).weaknesses?.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-xs font-semibold text-destructive mb-1">Areas to improve:</p>
+                    <ul className="text-xs text-muted-foreground list-disc pl-4">
+                      {(data as any).weaknesses.map((s: string, i: number) => <li key={i}>{s}</li>)}
                     </ul>
                   </div>
                 )}
