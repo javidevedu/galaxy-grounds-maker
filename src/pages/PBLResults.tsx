@@ -5,14 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home } from 'lucide-react';
+import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home, Users } from 'lucide-react';
 
 interface Feedback {
   score: number;
-  grammar: { score: number; errors: string[]; feedback: string };
+  grammar: { score: number; errors: string[]; correct_usage?: string[]; feedback: string };
   vocabulary: { score: number; strengths: string[]; weaknesses: string[]; feedback: string };
   comprehension: { score: number; feedback: string };
   communication: { score: number; feedback: string };
+  participation?: { score: number; feedback: string };
   overall_feedback: string;
   recommendations: string[];
 }
