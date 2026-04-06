@@ -87,7 +87,7 @@ export default function PBLCreateForm({ onSubmit, creating }: Props) {
 
           <div className="space-y-2">
             <Label>Grammar Topics</Label>
-            <Input value={grammarTopics} onChange={e => setGrammarTopics(e.target.value)} placeholder="Present Perfect, Conditionals..." required />
+            <TopicSelector selected={grammarTopics} onChange={setGrammarTopics} />
           </div>
 
           <div className="space-y-2">
