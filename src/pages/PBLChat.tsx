@@ -17,6 +17,7 @@ export default function PBLChat() {
   const navigate = useNavigate();
   const [activity, setActivity] = useState<any>(null);
   const [studentName, setStudentName] = useState('');
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
