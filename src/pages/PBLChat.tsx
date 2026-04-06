@@ -15,8 +15,8 @@ type Msg = { role: 'user' | 'assistant'; content: string };
 export default function PBLChat() {
   const { activityId, sessionId } = useParams();
   const navigate = useNavigate();
-  const [activity, setActivity] = useState<Tables<'pbl_activities'> | null>(null);
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [activity, setActivity] = useState<any>(null);
+  const [studentName, setStudentName] = useState('');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
