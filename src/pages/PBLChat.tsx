@@ -63,8 +63,8 @@ export default function PBLChat() {
       return;
     }
 
-    setActivity(actRes.data);
-    setStartTime(new Date(sessRes.data.started_at));
+    setActivity({ ...actRes.data, student_name: sessRes.data.student_name });
+    setStudentName(sessRes.data.student_name);
 
     if (sessRes.data.is_completed) {
       setFinished(true);
