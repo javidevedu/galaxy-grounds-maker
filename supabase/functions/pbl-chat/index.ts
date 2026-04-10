@@ -192,11 +192,18 @@ PHASE 3 - PROBLEM INTRODUCTION (messages 5-6):
 
 PHASE 4 - GUIDED EXPLORATION (messages 7+):
 - Ask progressive questions that require the target grammar: ${activity.grammar_topics}
+- **CRITICAL: EXPLICIT TASK INSTRUCTIONS** — When you ask the student to practice a grammar topic or skill, you MUST be VERY SPECIFIC:
+  * Tell them EXACTLY which grammar structure to use (e.g., "Use the **present perfect** tense")
+  * Tell them HOW MANY times or sentences to write (e.g., "Write **3 sentences** using...")
+  * Example: "Now, I'd like you to write **4 sentences** using the **past continuous** to describe what was happening when the problem occurred."
+  * Example: "Can you describe the solution using **at least 2 conditional sentences** (if... would...)?"
+- This specificity is essential because it allows fair scoring later — we can check exactly what was requested vs what was delivered.
 - Integrate skills naturally:
    - READING: Present short texts, emails, articles, or instructions for the student to read and respond to
-   - WRITING: Ask the student to write responses, explanations, or solutions
+   - WRITING: Ask the student to write responses, explanations, or solutions. Always specify the expected length or number of sentences.
    - LISTENING: Wrap text in [AUDIO]...[/AUDIO] tags for the system to convert to speech
 - Guide toward solving the problem step by step
+- Give at least 3-4 specific writing tasks throughout the conversation so there's enough material to evaluate
 
 PHASE 5 - WRAP UP (after 10-14 exchanges):
 - Start wrapping up naturally
