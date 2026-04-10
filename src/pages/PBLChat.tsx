@@ -26,8 +26,12 @@ export default function PBLChat() {
   const [finished, setFinished] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const initCalledRef = useRef(false);
+  const streamingIndexRef = useRef<number>(-1);
 
   useEffect(() => {
+    if (initCalledRef.current) return;
+    initCalledRef.current = true;
     fetchData();
   }, []);
 
@@ -64,7 +68,8 @@ export default function PBLChat() {
       return;
     }
 
-    setActivity({ ...actRes.data, student_name: sessRes.data.student_name });
+    const activityData = { ...actRes.data, student_name: sessRes.data.student_name };
+    setActivity(activityData);
     setStudentName(sessRes.data.student_name);
 
     if (sessRes.data.is_completed) {
@@ -76,14 +81,15 @@ export default function PBLChat() {
     if (msgRes.data?.length) {
       setMessages(msgRes.data.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content })));
     } else {
-      // Start conversation with AI
-      await sendToAI(null, []);
+      // Start conversation with AI - pass activity directly since state may not be set yet
+      await sendToAI(null, [], activityData);
     }
     setLoading(false);
   };
 
-  const sendToAI = async (message: string | null, history: Msg[]) => {
+  const sendToAI = async (message: string | null, history: Msg[], activityOverride?: any) => {
     setSending(true);
+    const activityToSend = activityOverride || activity;
     try {
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pbl-chat`;
       const resp = await fetch(url, {
@@ -95,7 +101,7 @@ export default function PBLChat() {
         body: JSON.stringify({
           session_id: sessionId,
           message,
-          activity,
+          activity: activityToSend,
           history,
         }),
       });
@@ -112,6 +118,7 @@ export default function PBLChat() {
       const decoder = new TextDecoder();
       let assistantContent = '';
       let textBuffer = '';
+      let addedMessage = false;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -135,20 +142,22 @@ export default function PBLChat() {
             const content = parsed.choices?.[0]?.delta?.content;
             if (content) {
               assistantContent += content;
-              setMessages(prev => {
-                const last = prev[prev.length - 1];
-                if (last?.role === 'assistant' && sending) {
-                  return prev.map((m, i) => i === prev.length - 1 ? { ...m, content: assistantContent } : m);
-                }
-                return [...prev, { role: 'assistant', content: assistantContent }];
-              });
+              if (!addedMessage) {
+                addedMessage = true;
+                setMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
+              } else {
+                setMessages(prev => {
+                  const updated = [...prev];
+                  updated[updated.length - 1] = { role: 'assistant', content: assistantContent };
+                  return updated;
+                });
+              }
             }
           } catch { /* partial JSON */ }
         }
       }
 
-      if (!assistantContent) {
-        // Non-streaming fallback
+      if (!assistantContent && textBuffer.trim()) {
         try {
           const data = JSON.parse(textBuffer);
           if (data.choices?.[0]?.message?.content) {
