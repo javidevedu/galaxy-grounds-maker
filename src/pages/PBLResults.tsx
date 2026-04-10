@@ -5,10 +5,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home, Users } from 'lucide-react';
+import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home, Users, ClipboardList } from 'lucide-react';
+
+interface TaskAnalysis {
+  task_description: string;
+  student_response: string;
+  completed: boolean;
+  score: number;
+  feedback: string;
+}
 
 interface Feedback {
   score: number;
+  task_analysis?: TaskAnalysis[];
   grammar: { score: number; errors: string[]; correct_usage?: string[]; feedback: string };
   vocabulary: { score: number; strengths: string[]; weaknesses: string[]; feedback: string };
   comprehension: { score: number; feedback: string };
