@@ -26,8 +26,12 @@ export default function PBLChat() {
   const [finished, setFinished] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const initCalledRef = useRef(false);
+  const streamingIndexRef = useRef<number>(-1);
 
   useEffect(() => {
+    if (initCalledRef.current) return;
+    initCalledRef.current = true;
     fetchData();
   }, []);
 
@@ -64,7 +68,8 @@ export default function PBLChat() {
       return;
     }
 
-    setActivity({ ...actRes.data, student_name: sessRes.data.student_name });
+    const activityData = { ...actRes.data, student_name: sessRes.data.student_name };
+    setActivity(activityData);
     setStudentName(sessRes.data.student_name);
 
     if (sessRes.data.is_completed) {
@@ -76,8 +81,8 @@ export default function PBLChat() {
     if (msgRes.data?.length) {
       setMessages(msgRes.data.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content })));
     } else {
-      // Start conversation with AI
-      await sendToAI(null, []);
+      // Start conversation with AI - pass activity directly since state may not be set yet
+      await sendToAI(null, [], activityData);
     }
     setLoading(false);
   };
