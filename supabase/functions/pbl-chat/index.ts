@@ -56,23 +56,37 @@ ${conversation}
 EVALUATION INSTRUCTIONS:
 1. CAREFULLY analyze EACH student response for grammar errors, vocabulary usage, and comprehension.
 2. Count specific errors — list every grammar mistake with what the student wrote vs. what was correct.
-3. Assess PARTICIPATION QUALITY:
+3. **TASK-BY-TASK ANALYSIS (CRITICAL)**:
+   - Go through the conversation and identify EVERY specific task/instruction that Alex gave to the student (e.g., "Write 3 sentences using present perfect", "Describe using at least 2 conditional sentences").
+   - For EACH task, evaluate: Was the task completed? Did the student use the requested grammar? Did they write the requested number of sentences?
+   - Include this analysis in the "task_analysis" field (see JSON structure below).
+   - The final score MUST be based on how well the student completed these specific tasks.
+4. Assess PARTICIPATION QUALITY:
    - Did the student give thoughtful, complete responses or just short/minimal answers?
    - Did the student engage with the problem and try to solve it?
    - Did the student use the target grammar topics (${activity.grammar_topics})?
-4. For SCORING, follow this rubric:
-   - 90-100: Excellent — very few errors, strong participation, used target grammar correctly, solved the problem effectively
-   - 75-89: Good — some errors but generally correct, decent participation, attempted target grammar
-   - 60-74: Acceptable — frequent errors, minimal participation, limited use of target grammar
-   - 40-59: Below expectations — many errors, very short responses, barely engaged with the problem
-   - 0-39: Poor — did not participate meaningfully, constant errors, no attempt at target grammar
-5. If the student barely participated (very few messages, one-word answers, off-topic), the score MUST reflect that (below 50).
-6. If the student made many grammar errors in the target topics, reduce the grammar score accordingly.
-7. Be HONEST — do not inflate scores. A student who made 10 grammar errors should NOT get 90% in grammar.
+5. For SCORING, follow this rubric:
+   - 90-100: Excellent — completed all tasks correctly, very few errors, strong participation
+   - 75-89: Good — completed most tasks, some errors but generally correct
+   - 60-74: Acceptable — missed some tasks or had frequent errors
+   - 40-59: Below expectations — many tasks incomplete, many errors, barely engaged
+   - 0-39: Poor — did not complete tasks, constant errors, no attempt at target grammar
+6. If the student barely participated (very few messages, one-word answers, off-topic), the score MUST reflect that (below 50).
+7. If the student made many grammar errors in the target topics, reduce the grammar score accordingly.
+8. Be HONEST — do not inflate scores. A student who made 10 grammar errors should NOT get 90% in grammar.
 
 Return ONLY valid JSON (no markdown) with this structure:
 {
   "score": 0-100,
+  "task_analysis": [
+    {
+      "task_description": "What Alex asked the student to do (e.g., 'Write 3 sentences using present perfect')",
+      "student_response": "What the student actually wrote in response",
+      "completed": true/false,
+      "score": 0-100,
+      "feedback": "Specific feedback: did they use the right grammar? Correct number of sentences? Any errors in this task?"
+    }
+  ],
   "grammar": { 
     "score": 0-100, 
     "errors": ["Student wrote: '...' → Correct: '...'  (rule: ...)"], 
@@ -97,7 +111,7 @@ Return ONLY valid JSON (no markdown) with this structure:
     "score": 0-100,
     "feedback": "quality and quantity of participation — did the student actively engage or give minimal effort?"
   },
-  "overall_feedback": "A comprehensive, honest paragraph as a teacher would write. Mention specific strengths AND weaknesses with examples from the conversation. Give concrete advice.",
+  "overall_feedback": "A comprehensive, honest paragraph. For EACH major task Alex assigned, mention what the student did and what score they earned for it. Include specific examples from the conversation. Give concrete advice.",
   "recommendations": ["specific, actionable study recommendations based on observed weaknesses"]
 }`;
 
@@ -192,11 +206,18 @@ PHASE 3 - PROBLEM INTRODUCTION (messages 5-6):
 
 PHASE 4 - GUIDED EXPLORATION (messages 7+):
 - Ask progressive questions that require the target grammar: ${activity.grammar_topics}
+- **CRITICAL: EXPLICIT TASK INSTRUCTIONS** — When you ask the student to practice a grammar topic or skill, you MUST be VERY SPECIFIC:
+  * Tell them EXACTLY which grammar structure to use (e.g., "Use the **present perfect** tense")
+  * Tell them HOW MANY times or sentences to write (e.g., "Write **3 sentences** using...")
+  * Example: "Now, I'd like you to write **4 sentences** using the **past continuous** to describe what was happening when the problem occurred."
+  * Example: "Can you describe the solution using **at least 2 conditional sentences** (if... would...)?"
+- This specificity is essential because it allows fair scoring later — we can check exactly what was requested vs what was delivered.
 - Integrate skills naturally:
    - READING: Present short texts, emails, articles, or instructions for the student to read and respond to
-   - WRITING: Ask the student to write responses, explanations, or solutions
+   - WRITING: Ask the student to write responses, explanations, or solutions. Always specify the expected length or number of sentences.
    - LISTENING: Wrap text in [AUDIO]...[/AUDIO] tags for the system to convert to speech
 - Guide toward solving the problem step by step
+- Give at least 3-4 specific writing tasks throughout the conversation so there's enough material to evaluate
 
 PHASE 5 - WRAP UP (after 10-14 exchanges):
 - Start wrapping up naturally
