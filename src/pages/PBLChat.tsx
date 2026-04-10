@@ -71,6 +71,7 @@ export default function PBLChat() {
     const activityData = { ...actRes.data, student_name: sessRes.data.student_name };
     setActivity(activityData);
     setStudentName(sessRes.data.student_name);
+    setStartTime(new Date(sessRes.data.started_at));
 
     if (sessRes.data.is_completed) {
       setFinished(true);
