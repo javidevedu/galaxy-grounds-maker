@@ -156,6 +156,17 @@ export default function PBLChat() {
           } catch { /* partial JSON */ }
         }
       }
+
+      if (!assistantContent && textBuffer.trim()) {
+        try {
+          const data = JSON.parse(textBuffer);
+          if (data.choices?.[0]?.message?.content) {
+            assistantContent = data.choices[0].message.content;
+            setMessages(prev => [...prev, { role: 'assistant', content: assistantContent }]);
+          }
+        } catch { /* ignore */ }
+      }
+    } catch (e) {
       console.error(e);
       toast.error('Connection error');
     }
