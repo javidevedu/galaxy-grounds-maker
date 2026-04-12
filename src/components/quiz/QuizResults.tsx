@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, PenLine, Mic, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CheckCircle2, XCircle, PenLine, Mic, Loader2, Home } from 'lucide-react';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Question = Tables<'questions'>;
@@ -180,6 +181,15 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
             </CardContent>
           </Card>
         )}
+
+        {/* Back to Home */}
+        <div className="text-center pt-2">
+          <a href="https://www.google.com/?hl=es">
+            <Button variant="outline">
+              <Home className="w-4 h-4 mr-2" /> Back to Home
+            </Button>
+          </a>
+        </div>
 
         {/* Speaking Notice */}
         {speakingQs.length > 0 && (
