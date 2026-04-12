@@ -208,11 +208,11 @@ export default function PBLResults() {
         )}
 
         <div className="text-center pb-8">
-          <Link to="/">
+          <a href="https://www.google.com/?hl=es">
             <Button variant="outline">
               <Home className="w-4 h-4 mr-2" /> Back to Home
             </Button>
-          </Link>
+          </a>
         </div>
       </div>
     </div>

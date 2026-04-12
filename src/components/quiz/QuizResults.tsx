@@ -181,6 +181,15 @@ export default function QuizResults({ questions, answers, attemptId, scorableCor
           </Card>
         )}
 
+        {/* Back to Home */}
+        <div className="text-center pt-2">
+          <a href="https://www.google.com/?hl=es">
+            <Button variant="outline">
+              <Home className="w-4 h-4 mr-2" /> Back to Home
+            </Button>
+          </a>
+        </div>
+
         {/* Speaking Notice */}
         {speakingQs.length > 0 && (
           <Card>
