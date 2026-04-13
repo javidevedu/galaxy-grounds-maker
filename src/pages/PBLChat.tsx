@@ -303,10 +303,21 @@ export default function PBLChat() {
                 <Clock className="w-3 h-3" /> {formatTime(timeLeft)}
               </Badge>
             )}
-          <Button size="sm" variant="destructive" onClick={handleFinish} disabled={evaluating || messages.length < 4}>
-            Finish Activity
-          </Button>
+            <Button size="sm" variant="destructive" onClick={handleFinish} disabled={evaluating}>
+              Finish Activity
+            </Button>
+          </div>
         </div>
+        {/* Estimated interaction time bar */}
+        {estimatedTime && interactionTimer !== null && !sending && !finished && (
+          <div className="flex items-center gap-2 mt-2 px-1 text-xs text-muted-foreground">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>
+              Estimated time to read & respond: <strong className={interactionTimer < 10 ? 'text-destructive' : 'text-foreground'}>{formatTime(interactionTimer)}</strong>
+              <span className="ml-2 opacity-60">(~{estimatedTime.readSec}s read + ~{estimatedTime.responseSec}s respond)</span>
+            </span>
+          </div>
+        )}
       </header>
 
       {/* Chat Messages */}
