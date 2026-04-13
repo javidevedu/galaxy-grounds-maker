@@ -75,9 +75,25 @@ Activity details:
 - Skills evaluated: ${activity.skills?.join(", ")}
 
 STATISTICS:
+- Time limit: ${timeLimitMin} minutes
+- Actual session duration: ${actualDurationMin} minutes
 - Total student messages: ${totalStudentMessages}
 - Total AI messages: ${totalAssistantMessages}
 - Average student response length: ${avgResponseLength} words
+- Total student words: ${totalStudentWords}
+- Total bot words (reading load): ${totalBotWords}
+
+INTERACTION TIMING (how long student took to read and respond to each bot message):
+${interactionTimings.length > 0 ? interactionTimings.join("\n") : "No timing data available"}
+
+TIME-FAIRNESS INSTRUCTIONS:
+- The activity was configured for ${timeLimitMin} minutes. Consider how many quality interactions are realistically possible in that time.
+- If a bot message was long (many words), the student needed MORE time to read and comprehend it. A response that took longer is NOT laziness — it reflects the complexity of the prompt.
+- If a bot message was short/simple (like asking the student's name), the student should respond quickly. A very slow response to a simple question may indicate distraction.
+- Compare the student's word count per response to what was asked: if the task asked for 3 sentences and the student wrote 3 sentences, that's complete regardless of speed.
+- For a ${timeLimitMin}-minute activity, expect roughly ${Math.floor(timeLimitMin / 1.5)}-${Math.floor(timeLimitMin / 1)} student responses. If the student gave fewer, check if the bot's messages were long/complex before penalizing.
+- DO NOT penalize a student for "few messages" if each message was substantive and the time was used up reading complex prompts.
+- DO penalize if responses are extremely short (1-3 words) when a longer answer was requested.
 
 Here is the complete conversation:
 ${conversation}
