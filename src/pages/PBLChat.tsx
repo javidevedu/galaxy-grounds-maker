@@ -5,12 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Clock, Volume2 } from 'lucide-react';
+import { Loader2, Send, Clock, Volume2, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
+
+/** Estimate reading time (words) + thinking/response time */
+const estimateInteractionTime = (text: string): { readSec: number; responseSec: number; totalSec: number } => {
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  // ~150 WPM for ESL readers
+  const readSec = Math.max(10, Math.ceil((wordCount / 150) * 60));
+  // Response time: base 20s + 5s per 20 words of prompt (longer prompts need more thought)
+  const responseSec = Math.max(15, 20 + Math.ceil((wordCount / 20) * 5));
+  return { readSec, responseSec, totalSec: readSec + responseSec };
+};
 
 export default function PBLChat() {
   const { activityId, sessionId } = useParams();
@@ -25,6 +35,9 @@ export default function PBLChat() {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [finished, setFinished] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
+  const [estimatedTime, setEstimatedTime] = useState<{ readSec: number; responseSec: number; totalSec: number } | null>(null);
+  const [interactionTimer, setInteractionTimer] = useState<number | null>(null);
+  const interactionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const initCalledRef = useRef(false);
   const streamingIndexRef = useRef<number>(-1);
