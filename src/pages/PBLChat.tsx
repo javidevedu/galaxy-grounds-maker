@@ -52,6 +52,32 @@ export default function PBLChat() {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+  // Start interaction timer when a new assistant message finishes streaming
+  useEffect(() => {
+    if (sending || finished || messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.role !== 'assistant') return;
+
+    const est = estimateInteractionTime(lastMsg.content);
+    setEstimatedTime(est);
+    setInteractionTimer(est.totalSec);
+
+    if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+    interactionTimerRef.current = setInterval(() => {
+      setInteractionTimer(prev => {
+        if (prev === null || prev <= 1) {
+          if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+    };
+  }, [messages, sending, finished]);
+
   useEffect(() => {
     if (!startTime || !activity || finished) return;
     const interval = setInterval(() => {
