@@ -215,6 +215,10 @@ export default function PBLChat() {
 
   const handleSend = async () => {
     if (!input.trim() || sending || finished) return;
+    // Clear interaction timer on send
+    if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+    setInteractionTimer(null);
+    setEstimatedTime(null);
     const userMsg = input.trim();
     setInput('');
     const newMessages: Msg[] = [...messages, { role: 'user', content: userMsg }];
@@ -287,17 +291,18 @@ export default function PBLChat() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-sm px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <h1 className="font-heading font-bold text-lg">{activity?.title}</h1>
-          <Badge variant="outline">{activity?.mcer_level}</Badge>
-        </div>
-        <div className="flex items-center gap-3">
-          {timeLeft !== null && (
-            <Badge variant={timeLeft < 60 ? 'destructive' : 'secondary'} className="flex items-center gap-1 text-sm">
-              <Clock className="w-3 h-3" /> {formatTime(timeLeft)}
-            </Badge>
-          )}
+      <header className="border-b bg-card/80 backdrop-blur-sm px-4 py-3 shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="font-heading font-bold text-lg">{activity?.title}</h1>
+            <Badge variant="outline">{activity?.mcer_level}</Badge>
+          </div>
+          <div className="flex items-center gap-3">
+            {timeLeft !== null && (
+              <Badge variant={timeLeft < 60 ? 'destructive' : 'secondary'} className="flex items-center gap-1 text-sm">
+                <Clock className="w-3 h-3" /> {formatTime(timeLeft)}
+              </Badge>
+            )}
           <Button size="sm" variant="destructive" onClick={handleFinish} disabled={evaluating || messages.length < 4}>
             Finish Activity
           </Button>
