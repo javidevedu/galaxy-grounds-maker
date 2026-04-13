@@ -1,213 +1,64 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Loader2, CheckCircle, BookOpen, Pen, Headphones, MessageSquare, Home, Users, ClipboardList } from 'lucide-react';
-
-interface TaskAnalysis {
-  task_description: string;
-  student_response: string;
-  completed: boolean;
-  score: number;
-  feedback: string;
-}
-
-interface Feedback {
-  score: number;
-  task_analysis?: TaskAnalysis[];
-  grammar: { score: number; errors: string[]; correct_usage?: string[]; feedback: string };
-  vocabulary: { score: number; strengths: string[]; weaknesses: string[]; feedback: string };
-  comprehension: { score: number; feedback: string };
-  communication: { score: number; feedback: string };
-  participation?: { score: number; feedback: string };
-  overall_feedback: string;
-  recommendations: string[];
-}
+import { Loader2, CheckCircle, Home } from 'lucide-react';
 
 export default function PBLResults() {
   const { sessionId } = useParams();
   const [session, setSession] = useState<any>(null);
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchResults();
+    const fetch = async () => {
+      const { data } = await supabase
+        .from('pbl_sessions')
+        .select('*')
+        .eq('id', sessionId!)
+        .single();
+      if (data) setSession(data);
+      setLoading(false);
+    };
+    fetch();
   }, []);
 
-  const fetchResults = async () => {
-    const { data } = await supabase
-      .from('pbl_sessions')
-      .select('*')
-      .eq('id', sessionId!)
-      .single();
-
-    if (data) {
-      setSession(data);
-      setFeedback(data.detailed_feedback as unknown as Feedback);
-    }
-    setLoading(false);
-  };
-
   if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin w-8 h-8 text-primary" /></div>;
-  if (!session || !feedback) return (
+  if (!session) return (
     <div className="min-h-screen flex items-center justify-center">
       <p className="text-muted-foreground">Results not available yet.</p>
     </div>
   );
 
-  const scoreColor = (score: number) => score >= 80 ? 'text-green-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600';
+  const score = session.score ?? 0;
+  const scoreColor = score >= 80 ? 'text-green-600' : score >= 60 ? 'text-yellow-600' : 'text-red-600';
 
   return (
     <div className="min-h-screen bg-background p-4">
-      <div className="max-w-3xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="text-center space-y-3 pt-8">
-          <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
-          <h1 className="text-3xl font-heading font-bold">Activity Completed!</h1>
-          <p className="text-muted-foreground">Here's your detailed performance report</p>
-        </div>
+      <div className="max-w-md mx-auto space-y-6 pt-16 text-center">
+        <CheckCircle className="w-20 h-20 text-green-500 mx-auto" />
+        <h1 className="text-3xl font-heading font-bold">Activity Completed!</h1>
 
-        {/* Overall Score */}
         <Card className="glass-card">
-          <CardContent className="py-8 text-center">
-            <div className={`text-6xl font-heading font-bold ${scoreColor(feedback.score)}`}>
-              {feedback.score}%
+          <CardContent className="py-10">
+            <div className={`text-7xl font-heading font-bold ${scoreColor}`}>
+              {score}%
             </div>
-            <p className="text-muted-foreground mt-2">Overall Score</p>
-            <Progress value={feedback.score} className="mt-4 max-w-xs mx-auto" />
+            <p className="text-muted-foreground mt-3 text-lg">Your Score</p>
+            <Progress value={score} className="mt-5 max-w-xs mx-auto" />
           </CardContent>
         </Card>
 
-        {/* Task-by-Task Analysis */}
-        {feedback.task_analysis && feedback.task_analysis.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2">
-                <ClipboardList className="w-5 h-5" />
-                Task-by-Task Evaluation
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {feedback.task_analysis.map((task, i) => (
-                <div key={i} className="border rounded-lg p-4 space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-semibold">Task {i + 1}</h4>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={task.completed ? 'default' : 'destructive'}>
-                        {task.completed ? '✅ Completed' : '❌ Incomplete'}
-                      </Badge>
-                      <Badge variant="outline" className={scoreColor(task.score)}>{task.score}%</Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">What was asked:</p>
-                    <p className="text-sm">{task.task_description}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">What you wrote:</p>
-                    <p className="text-sm italic border-l-2 border-primary/30 pl-3">{task.student_response}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground">Feedback:</p>
-                    <p className="text-sm">{task.feedback}</p>
-                  </div>
-                  <Progress value={task.score} className="h-1.5" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Skill Breakdown */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {[
-            { title: 'Grammar', icon: Pen, data: feedback.grammar },
-            { title: 'Vocabulary', icon: BookOpen, data: feedback.vocabulary },
-            { title: 'Comprehension', icon: Headphones, data: feedback.comprehension },
-            { title: 'Communication', icon: MessageSquare, data: feedback.communication },
-            ...(feedback.participation ? [{ title: 'Participation', icon: Users, data: feedback.participation }] : []),
-          ].map(({ title, icon: Icon, data }) => (
-            <Card key={title}>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <Icon className="w-4 h-4" />
-                  {title}
-                  <Badge variant="outline" className={scoreColor(data.score)}>{data.score}%</Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <Progress value={data.score} className="mb-3" />
-                <p className="text-sm text-muted-foreground">{data.feedback}</p>
-                {'errors' in data && (data as any).errors?.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs font-semibold text-destructive mb-1">Errors found:</p>
-                    <ul className="text-xs text-muted-foreground list-disc pl-4">
-                      {(data as any).errors.map((e: string, i: number) => <li key={i}>{e}</li>)}
-                    </ul>
-                  </div>
-                )}
-                {'correct_usage' in data && (data as any).correct_usage?.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs font-semibold text-green-600 mb-1">Correct usage:</p>
-                    <ul className="text-xs text-muted-foreground list-disc pl-4">
-                      {(data as any).correct_usage.map((e: string, i: number) => <li key={i}>{e}</li>)}
-                    </ul>
-                  </div>
-                )}
-                {'strengths' in data && (data as any).strengths?.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs font-semibold text-green-600 mb-1">Strengths:</p>
-                    <ul className="text-xs text-muted-foreground list-disc pl-4">
-                      {(data as any).strengths.map((s: string, i: number) => <li key={i}>{s}</li>)}
-                    </ul>
-                  </div>
-                )}
-                {'weaknesses' in data && (data as any).weaknesses?.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs font-semibold text-destructive mb-1">Areas to improve:</p>
-                    <ul className="text-xs text-muted-foreground list-disc pl-4">
-                      {(data as any).weaknesses.map((s: string, i: number) => <li key={i}>{s}</li>)}
-                    </ul>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Overall Feedback */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Teacher's Feedback</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm leading-relaxed">{feedback.overall_feedback}</p>
+          <CardContent className="py-6">
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Your teacher will review your performance and send you detailed feedback soon. Great job completing the activity! 🎉
+            </p>
           </CardContent>
         </Card>
 
-        {/* Recommendations */}
-        {feedback.recommendations?.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Study Recommendations</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {feedback.recommendations.map((r, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <span className="text-primary font-bold">{i + 1}.</span>
-                    {r}
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="text-center pb-8">
+        <div className="pb-8">
           <a href="https://www.google.com/?hl=es">
             <Button variant="outline">
               <Home className="w-4 h-4 mr-2" /> Back to Home
