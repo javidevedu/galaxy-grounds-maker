@@ -5,12 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, Clock, Volume2 } from 'lucide-react';
+import { Loader2, Send, Clock, Volume2, BookOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import ReactMarkdown from 'react-markdown';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
+
+/** Estimate reading time (words) + thinking/response time */
+const estimateInteractionTime = (text: string): { readSec: number; responseSec: number; totalSec: number } => {
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  // ~150 WPM for ESL readers
+  const readSec = Math.max(10, Math.ceil((wordCount / 150) * 60));
+  // Response time: base 20s + 5s per 20 words of prompt (longer prompts need more thought)
+  const responseSec = Math.max(15, 20 + Math.ceil((wordCount / 20) * 5));
+  return { readSec, responseSec, totalSec: readSec + responseSec };
+};
 
 export default function PBLChat() {
   const { activityId, sessionId } = useParams();
@@ -25,6 +35,9 @@ export default function PBLChat() {
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [finished, setFinished] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
+  const [estimatedTime, setEstimatedTime] = useState<{ readSec: number; responseSec: number; totalSec: number } | null>(null);
+  const [interactionTimer, setInteractionTimer] = useState<number | null>(null);
+  const interactionTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const initCalledRef = useRef(false);
   const streamingIndexRef = useRef<number>(-1);
@@ -38,6 +51,32 @@ export default function PBLChat() {
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  // Start interaction timer when a new assistant message finishes streaming
+  useEffect(() => {
+    if (sending || finished || messages.length === 0) return;
+    const lastMsg = messages[messages.length - 1];
+    if (lastMsg.role !== 'assistant') return;
+
+    const est = estimateInteractionTime(lastMsg.content);
+    setEstimatedTime(est);
+    setInteractionTimer(est.totalSec);
+
+    if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+    interactionTimerRef.current = setInterval(() => {
+      setInteractionTimer(prev => {
+        if (prev === null || prev <= 1) {
+          if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => {
+      if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+    };
+  }, [messages, sending, finished]);
 
   useEffect(() => {
     if (!startTime || !activity || finished) return;
@@ -176,6 +215,10 @@ export default function PBLChat() {
 
   const handleSend = async () => {
     if (!input.trim() || sending || finished) return;
+    // Clear interaction timer on send
+    if (interactionTimerRef.current) clearInterval(interactionTimerRef.current);
+    setInteractionTimer(null);
+    setEstimatedTime(null);
     const userMsg = input.trim();
     setInput('');
     const newMessages: Msg[] = [...messages, { role: 'user', content: userMsg }];
@@ -248,21 +291,33 @@ export default function PBLChat() {
   return (
     <div className="h-screen flex flex-col bg-background">
       {/* Header */}
-      <header className="border-b bg-card/80 backdrop-blur-sm px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <h1 className="font-heading font-bold text-lg">{activity?.title}</h1>
-          <Badge variant="outline">{activity?.mcer_level}</Badge>
+      <header className="border-b bg-card/80 backdrop-blur-sm px-4 py-3 shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h1 className="font-heading font-bold text-lg">{activity?.title}</h1>
+            <Badge variant="outline">{activity?.mcer_level}</Badge>
+          </div>
+          <div className="flex items-center gap-3">
+            {timeLeft !== null && (
+              <Badge variant={timeLeft < 60 ? 'destructive' : 'secondary'} className="flex items-center gap-1 text-sm">
+                <Clock className="w-3 h-3" /> {formatTime(timeLeft)}
+              </Badge>
+            )}
+            <Button size="sm" variant="destructive" onClick={handleFinish} disabled={evaluating}>
+              Finish Activity
+            </Button>
+          </div>
         </div>
-        <div className="flex items-center gap-3">
-          {timeLeft !== null && (
-            <Badge variant={timeLeft < 60 ? 'destructive' : 'secondary'} className="flex items-center gap-1 text-sm">
-              <Clock className="w-3 h-3" /> {formatTime(timeLeft)}
-            </Badge>
-          )}
-          <Button size="sm" variant="destructive" onClick={handleFinish} disabled={evaluating || messages.length < 4}>
-            Finish Activity
-          </Button>
-        </div>
+        {/* Estimated interaction time bar */}
+        {estimatedTime && interactionTimer !== null && !sending && !finished && (
+          <div className="flex items-center gap-2 mt-2 px-1 text-xs text-muted-foreground">
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>
+              Estimated time to read & respond: <strong className={interactionTimer < 10 ? 'text-destructive' : 'text-foreground'}>{formatTime(interactionTimer)}</strong>
+              <span className="ml-2 opacity-60">(~{estimatedTime.readSec}s read + ~{estimatedTime.responseSec}s respond)</span>
+            </span>
+          </div>
+        )}
       </header>
 
       {/* Chat Messages */}

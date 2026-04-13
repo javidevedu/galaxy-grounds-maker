@@ -32,9 +32,38 @@ serve(async (req) => {
       const totalStudentMessages = (messages || []).filter((m: any) => m.role === "user").length;
       const totalAssistantMessages = (messages || []).filter((m: any) => m.role === "assistant").length;
       const studentResponses = (messages || []).filter((m: any) => m.role === "user").map((m: any) => m.content);
+      const assistantResponses = (messages || []).filter((m: any) => m.role === "assistant").map((m: any) => m.content);
       const avgResponseLength = studentResponses.length > 0 
         ? Math.round(studentResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0) / studentResponses.length) 
         : 0;
+
+      // Time-based analysis
+      const timeLimitMin = activity.time_limit_minutes || 30;
+      const sortedMsgs = (messages || []).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      const sessionStarted = sortedMsgs.length > 0 ? new Date(sortedMsgs[0].created_at).getTime() : Date.now();
+      const sessionEnded = sortedMsgs.length > 0 ? new Date(sortedMsgs[sortedMsgs.length - 1].created_at).getTime() : Date.now();
+      const actualDurationMin = Math.round((sessionEnded - sessionStarted) / 60000);
+
+      // Per-interaction timing analysis
+      const interactionTimings: string[] = [];
+      for (let i = 0; i < sortedMsgs.length; i++) {
+        const msg = sortedMsgs[i];
+        if (msg.role === "user" && i > 0) {
+          const prevMsg = sortedMsgs[i - 1];
+          if (prevMsg.role === "assistant") {
+            const timeTaken = Math.round((new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime()) / 1000);
+            const botWordCount = prevMsg.content.split(/\s+/).length;
+            const estimatedReadTime = Math.ceil((botWordCount / 150) * 60); // ESL ~150 WPM
+            const studentWordCount = msg.content.split(/\s+/).length;
+            interactionTimings.push(
+              `Bot msg (${botWordCount} words, ~${estimatedReadTime}s to read) → Student responded in ${timeTaken}s with ${studentWordCount} words`
+            );
+          }
+        }
+      }
+
+      const totalStudentWords = studentResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0);
+      const totalBotWords = assistantResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0);
 
       const evalPrompt = `You are an expert English teacher evaluating a student's performance in a Problem-Based Learning activity. You must be FAIR and ACCURATE in your scoring.
 
@@ -46,9 +75,25 @@ Activity details:
 - Skills evaluated: ${activity.skills?.join(", ")}
 
 STATISTICS:
+- Time limit: ${timeLimitMin} minutes
+- Actual session duration: ${actualDurationMin} minutes
 - Total student messages: ${totalStudentMessages}
 - Total AI messages: ${totalAssistantMessages}
 - Average student response length: ${avgResponseLength} words
+- Total student words: ${totalStudentWords}
+- Total bot words (reading load): ${totalBotWords}
+
+INTERACTION TIMING (how long student took to read and respond to each bot message):
+${interactionTimings.length > 0 ? interactionTimings.join("\n") : "No timing data available"}
+
+TIME-FAIRNESS INSTRUCTIONS:
+- The activity was configured for ${timeLimitMin} minutes. Consider how many quality interactions are realistically possible in that time.
+- If a bot message was long (many words), the student needed MORE time to read and comprehend it. A response that took longer is NOT laziness — it reflects the complexity of the prompt.
+- If a bot message was short/simple (like asking the student's name), the student should respond quickly. A very slow response to a simple question may indicate distraction.
+- Compare the student's word count per response to what was asked: if the task asked for 3 sentences and the student wrote 3 sentences, that's complete regardless of speed.
+- For a ${timeLimitMin}-minute activity, expect roughly ${Math.floor(timeLimitMin / 1.5)}-${Math.floor(timeLimitMin / 1)} student responses. If the student gave fewer, check if the bot's messages were long/complex before penalizing.
+- DO NOT penalize a student for "few messages" if each message was substantive and the time was used up reading complex prompts.
+- DO penalize if responses are extremely short (1-3 words) when a longer answer was requested.
 
 Here is the complete conversation:
 ${conversation}
