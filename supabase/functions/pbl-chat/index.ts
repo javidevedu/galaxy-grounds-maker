@@ -32,9 +32,38 @@ serve(async (req) => {
       const totalStudentMessages = (messages || []).filter((m: any) => m.role === "user").length;
       const totalAssistantMessages = (messages || []).filter((m: any) => m.role === "assistant").length;
       const studentResponses = (messages || []).filter((m: any) => m.role === "user").map((m: any) => m.content);
+      const assistantResponses = (messages || []).filter((m: any) => m.role === "assistant").map((m: any) => m.content);
       const avgResponseLength = studentResponses.length > 0 
         ? Math.round(studentResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0) / studentResponses.length) 
         : 0;
+
+      // Time-based analysis
+      const timeLimitMin = activity.time_limit_minutes || 30;
+      const sortedMsgs = (messages || []).sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      const sessionStarted = sortedMsgs.length > 0 ? new Date(sortedMsgs[0].created_at).getTime() : Date.now();
+      const sessionEnded = sortedMsgs.length > 0 ? new Date(sortedMsgs[sortedMsgs.length - 1].created_at).getTime() : Date.now();
+      const actualDurationMin = Math.round((sessionEnded - sessionStarted) / 60000);
+
+      // Per-interaction timing analysis
+      const interactionTimings: string[] = [];
+      for (let i = 0; i < sortedMsgs.length; i++) {
+        const msg = sortedMsgs[i];
+        if (msg.role === "user" && i > 0) {
+          const prevMsg = sortedMsgs[i - 1];
+          if (prevMsg.role === "assistant") {
+            const timeTaken = Math.round((new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime()) / 1000);
+            const botWordCount = prevMsg.content.split(/\s+/).length;
+            const estimatedReadTime = Math.ceil((botWordCount / 150) * 60); // ESL ~150 WPM
+            const studentWordCount = msg.content.split(/\s+/).length;
+            interactionTimings.push(
+              `Bot msg (${botWordCount} words, ~${estimatedReadTime}s to read) → Student responded in ${timeTaken}s with ${studentWordCount} words`
+            );
+          }
+        }
+      }
+
+      const totalStudentWords = studentResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0);
+      const totalBotWords = assistantResponses.reduce((sum: number, r: string) => sum + r.split(/\s+/).length, 0);
 
       const evalPrompt = `You are an expert English teacher evaluating a student's performance in a Problem-Based Learning activity. You must be FAIR and ACCURATE in your scoring.
 
