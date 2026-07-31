@@ -35,8 +35,10 @@ Rules for EVERY paragraph:
 - Punctuation must be simple and dictation friendly.
 
 Return ONLY valid JSON (no markdown) with this exact shape:
-{ "paragraphs": [ { "english": "...", "spanish": "..." } ] }
-"spanish" is a faithful Spanish translation of "english".`;
+{ "paragraphs": [ { "english": "...", "spanish": "...", "parts": [ { "text": "The teacher", "role": "subject" } ] } ] }
+"spanish" is a faithful Spanish translation of "english".
+"parts" splits the SAME english text into consecutive chunks: joining all "text" values with single spaces must reproduce "english" (punctuation included).
+Each chunk "role" must be one of: subject, auxiliary, verb, object, adverbial, other.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
