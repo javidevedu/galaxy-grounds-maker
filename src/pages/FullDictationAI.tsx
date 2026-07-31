@@ -55,41 +55,39 @@ const heuristicParts = (text: string): Part[] => {
   const sentences = text.split(/(?<=[.!?])\s+/);
   for (const sentence of sentences) {
     const words = sentence.split(/\s+/).filter(Boolean);
-    let stage: 'subject' | 'predicate' = 'subject';
+    let subjectDone = false;
+    let subjectCore = 0;
     let verbSeen = false;
-    words.forEach((w) => {
+    for (const w of words) {
       const clean = w.toLowerCase().replace(/[^a-z']/g, '');
       let role: string;
       if (AUX.has(clean)) {
         role = 'auxiliary';
-        stage = 'predicate';
+        subjectDone = true;
       } else if (PREP.has(clean) || /ly$/.test(clean)) {
         role = 'adverbial';
-      } else if (stage === 'subject') {
-        role = SUBJ_PRON.has(clean) || DET.has(clean) || true ? 'subject' : 'subject';
-        if (SUBJ_PRON.has(clean)) stage = 'subject';
+      } else if (!subjectDone) {
+        if (subjectCore > 0) {
+          role = 'verb';
+          subjectDone = true;
+          verbSeen = true;
+        } else {
+          role = 'subject';
+          if (!DET.has(clean)) subjectCore++;
+          if (SUBJ_PRON.has(clean)) subjectCore++;
+        }
       } else if (!verbSeen) {
         role = 'verb';
         verbSeen = true;
       } else {
         role = 'object';
       }
-      // el primer token no auxiliar tras el sujeto inicial se considera verbo
-      if (stage === 'subject' && role === 'subject' && out.length > 0) {
-        const prev = out[out.length - 1];
-        if (prev.role === 'subject' && (SUBJ_PRON.has(prev.text.toLowerCase().replace(/[^a-z']/g, '')) || !DET.has(clean))) {
-          if (!DET.has(clean) && (SUBJ_PRON.has(prev.text.toLowerCase().replace(/[^a-z']/g, '')) || !DET.has(prev.text.toLowerCase()))) {
-            role = 'verb';
-            stage = 'predicate';
-            verbSeen = true;
-          }
-        }
-      }
       out.push({ text: w, role });
-    });
+    }
   }
   return out;
 };
+
 
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
