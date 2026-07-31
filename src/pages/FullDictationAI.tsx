@@ -62,7 +62,21 @@ export default function FullDictationAI() {
     };
   }, []);
 
-  const finalTopic = useMemo(() => (topic === '__custom__' ? customTopic : topic), [topic, customTopic]);
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (topicBoxRef.current && !topicBoxRef.current.contains(e.target as Node)) setTopicOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  const filteredTopics = useMemo(() => {
+    const q = topicQuery.trim().toLowerCase();
+    const list = q ? ENGLISH_TOPICS.filter((t) => t.toLowerCase().includes(q)) : ENGLISH_TOPICS;
+    return list.slice(0, 12);
+  }, [topicQuery]);
+
+  const finalTopic = topic;
 
   const generate = async () => {
     if (!finalTopic.trim()) {
