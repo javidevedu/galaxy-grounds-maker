@@ -12,10 +12,25 @@ import { supabase } from '@/integrations/supabase/client';
 import { ENGLISH_TOPICS } from '@/constants/englishTopics';
 import { Headphones, Loader2, Play, Square, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
+interface Part {
+  text: string;
+  role: string;
+}
+
 interface Paragraph {
   english: string;
   spanish: string;
+  parts?: Part[];
 }
+
+const ROLE_STYLES: Record<string, { color: string; label: string }> = {
+  subject: { color: 'text-gram-subject', label: 'Sujeto' },
+  auxiliary: { color: 'text-gram-auxiliary', label: 'Auxiliar' },
+  verb: { color: 'text-gram-verb', label: 'Verbo' },
+  object: { color: 'text-gram-object', label: 'Complemento' },
+  adverbial: { color: 'text-gram-adverbial', label: 'Adverbial' },
+  other: { color: 'text-gram-other', label: 'Otros' },
+};
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
