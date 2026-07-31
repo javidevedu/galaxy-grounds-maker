@@ -288,9 +288,15 @@ export default function FullDictationAI() {
         {paragraphs.length > 0 && (
           <div className="space-y-4">
             {revealed && (
-              <div className="flex flex-wrap gap-3 rounded-lg border p-3 text-xs">
+              <div className="flex flex-wrap gap-2 rounded-lg border p-3 text-xs">
                 {Object.entries(ROLE_STYLES).map(([role, s]) => (
-                  <span key={role} className={`${s.color} font-medium`}>● {s.label}</span>
+                  <span
+                    key={role}
+                    className="rounded px-2 py-0.5 font-medium"
+                    style={roleStyle(role)}
+                  >
+                    {s.label}
+                  </span>
                 ))}
               </div>
             )}
