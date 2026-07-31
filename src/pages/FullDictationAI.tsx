@@ -36,7 +36,9 @@ const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
 export default function FullDictationAI() {
   const [topic, setTopic] = useState('');
-  const [customTopic, setCustomTopic] = useState('');
+  const [topicQuery, setTopicQuery] = useState('');
+  const [topicOpen, setTopicOpen] = useState(false);
+  const topicBoxRef = useRef<HTMLDivElement>(null);
   const [level, setLevel] = useState('A2');
   const [count, setCount] = useState('1');
   const [context, setContext] = useState('');
