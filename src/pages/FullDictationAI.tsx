@@ -133,25 +133,40 @@ export default function FullDictationAI() {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 relative" ref={topicBoxRef}>
                 <Label>Tema principal</Label>
-                <Select value={topic} onValueChange={setTopic}>
-                  <SelectTrigger><SelectValue placeholder="Escoge un tema" /></SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {ENGLISH_TOPICS.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                <Input
+                  value={topicQuery}
+                  onChange={(e) => {
+                    setTopicQuery(e.target.value);
+                    setTopic(e.target.value);
+                    setTopicOpen(true);
+                  }}
+                  onFocus={() => setTopicOpen(true)}
+                  placeholder="Escribe iniciales del tema (ej. pres, voc...)"
+                  maxLength={200}
+                />
+                {topicOpen && filteredTopics.length > 0 && (
+                  <div className="absolute z-50 top-full mt-1 w-full max-h-56 overflow-y-auto rounded-md border bg-popover p-1 shadow-md">
+                    {filteredTopics.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          setTopic(t);
+                          setTopicQuery(t);
+                          setTopicOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                      >
+                        {t}
+                      </button>
                     ))}
-                    <SelectItem value="__custom__">Otro (escribir)</SelectItem>
-                  </SelectContent>
-                </Select>
-                {topic === '__custom__' && (
-                  <Input
-                    value={customTopic}
-                    onChange={(e) => setCustomTopic(e.target.value)}
-                    placeholder="Escribe el tema"
-                    maxLength={200}
-                  />
+                  </div>
                 )}
+                <p className="text-xs text-muted-foreground">
+                  Puedes escoger de la lista o escribir tu propio tema.
+                </p>
               </div>
 
               <div className="space-y-2">
