@@ -193,6 +193,13 @@ export default function Home() {
         `}</style>
       </section>
 
+      {/* Author credit */}
+      <section style={{ background: '#ffffff', padding: '3rem 1.5rem', textAlign: 'center' }}>
+        <p style={{ color: '#1a1a1a', fontSize: '1rem', fontWeight: 500, margin: 0 }}>
+          Página elaborada por Javie Alejandro Castillo Camayo
+        </p>
+      </section>
+
       {/* Footer */}
       <footer style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-color)', padding: '2rem 0', textAlign: 'center' }}>
         <p style={{ color: 'var(--text-tertiary)', fontSize: '0.85rem' }}>© 2025 JaviDevEdu. All rights reserved.</p>
