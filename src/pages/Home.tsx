@@ -430,8 +430,9 @@ export default function Home() {
         .app-card-active:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg), var(--glow) !important; border-color: var(--accent-primary) !important; }
         .project-card-home:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg), var(--glow); border-color: var(--accent-primary); }
         @media (max-width: 1200px) {
-          .home-main-layout { grid-template-columns: '1fr 340px' !important; gap: 2.5rem !important; }
+          .home-main-layout { grid-template-columns: 1fr 340px !important; gap: 2.5rem !important; }
         }
+
 
         @media (max-width: 968px) {
           .home-main-layout { grid-template-columns: 1fr !important; gap: 2.5rem !important; padding: 2rem 1.5rem !important; }
