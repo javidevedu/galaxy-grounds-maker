@@ -193,87 +193,14 @@ export default function Home() {
         `}</style>
       </section>
 
-      {/* Main 3-Column Layout */}
+      {/* Main 2-Column Layout */}
       <div style={{
-        display: 'grid', gridTemplateColumns: '340px 1fr 380px', gap: '3rem',
+        display: 'grid', gridTemplateColumns: '1fr 380px', gap: '3rem',
         maxWidth: 1920, margin: '0 auto', padding: '3rem 2.5rem'
       }} className="home-main-layout">
-        {/* Left Sidebar */}
-        <aside style={{ position: 'sticky', top: '4rem', height: 'fit-content' }}>
-          <div style={{
-            background: 'var(--bg-secondary)', borderRadius: 20, padding: '2rem',
-            border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)'
-          }}>
-            <div style={{
-              width: 120, height: 120, borderRadius: '50%', margin: '0 auto 1rem',
-              overflow: 'hidden', border: '3px solid var(--border-color)', background: 'var(--hover-bg)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '2.5rem', fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: 'var(--accent-primary)'
-            }}>
-              JC
-            </div>
-            <h2 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.5rem', fontWeight: 700, textAlign: 'center', marginBottom: '0.5rem' }}>
-              Javier Castillo
-            </h2>
-            <p style={{ textAlign: 'center', color: 'var(--accent-primary)', fontWeight: 500, fontSize: '0.95rem', marginBottom: '0.5rem' }}>
-              EdTech
-            </p>
-            <p style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              Educator & Developer
-            </p>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-              padding: '0.75rem 1rem', background: 'var(--hover-bg)', borderRadius: 12, marginBottom: '1rem', fontSize: '0.9rem'
-            }}>
-              <i className="fas fa-briefcase" />
-              <strong style={{ color: 'var(--accent-primary)' }}>2+</strong> years of experience
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                {[
-                { icon: 'fab fa-linkedin-in', href: 'https://www.linkedin.com/in/javier-castillo-83562b33b/' },
-                { icon: 'fab fa-github', href: 'https://github.com/javidevedu' },
-                { icon: 'fab fa-instagram', href: 'https://www.instagram.com/javidevedu/' },
-                { icon: 'fab fa-youtube', href: 'https://www.youtube.com/@jjavidevedu' },
-                { icon: 'fab fa-tiktok', href: 'https://www.tiktok.com/@javidevedu' },
-                ].map((s, i) => (
-                <a key={i} href={s.href} target="_blank" rel="noopener noreferrer" style={{
-                  width: 40, height: 40, borderRadius: 10, background: 'var(--hover-bg)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: 'var(--text-secondary)', textDecoration: 'none',
-                  border: '1px solid var(--border-color)', transition: 'all 0.3s ease'
-                }}>
-                  <i className={s.icon} />
-                </a>
-                ))}
-            </div>
-          </div>
-
-          {/* Experience */}
-          <div style={{
-            background: 'var(--bg-secondary)', borderRadius: 20, padding: '1.5rem',
-            border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)', marginTop: '1.5rem'
-          }}>
-            <h3 style={{ fontFamily: "'Space Grotesk', sans-serif", fontSize: '1.1rem', fontWeight: 600, marginBottom: '1.25rem', textAlign: 'center' }}>Experience</h3>
-            {[
-              { role: 'English Teacher – UNILINGUA', company: 'Universidad del Cauca', type: 'Contract', date: 'Aug 2025 - Present · 4 mos', location: 'Popayán · On-site' },
-              { role: 'Monitor in Communications Management', company: 'Universidad Nacional Abierta y a Distancia', type: 'Full-time', date: 'Mar 2025 - Present · 9 mos', location: 'Popayán · On-site' },
-              { role: 'English teaching monitor - Unilingua', company: 'Universidad del Cauca', type: 'Contract', date: 'Jul 2022 - Jun 2023 · 1 yr', location: 'Popayán, Cauca, Colombia · On-site' },
-            ].map((exp, i) => (
-              <div key={i} style={{ padding: '1rem 0', borderBottom: i < 2 ? '1px solid var(--border-color)' : 'none' }}>
-                <div style={{ fontSize: '0.95rem', fontWeight: 600, marginBottom: '0.25rem' }}>{exp.role}</div>
-                <div style={{ fontSize: '0.85rem', color: 'var(--accent-primary)', marginBottom: '0.25rem', fontWeight: 500 }}>{exp.company}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '0.4rem' }}>{exp.type}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)', marginBottom: '0.25rem' }}>{exp.date}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-tertiary)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                  <i className="fas fa-map-marker-alt" style={{ fontSize: '0.65rem' }} /> {exp.location}
-                </div>
-              </div>
-            ))}
-          </div>
-        </aside>
-
         {/* Main Content */}
         <main>
+
           {/* Projects Section */}
           <section className="fade-in-up">
             <div style={{ marginBottom: '2rem' }}>
