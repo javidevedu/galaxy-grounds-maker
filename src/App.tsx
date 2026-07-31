@@ -18,6 +18,7 @@ import PBLAdminResults from "./pages/PBLAdminResults";
 import PBLStart from "./pages/PBLStart";
 import PBLChat from "./pages/PBLChat";
 import PBLResults from "./pages/PBLResults";
+import FullDictationAI from "./pages/FullDictationAI";
 import BookReview from "./pages/projects/BookReview";
 import TravelRecommendation from "./pages/projects/TravelRecommendation";
 import JavidevSite from "./pages/projects/JavidevSite";
