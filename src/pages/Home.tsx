@@ -17,6 +17,13 @@ const appsCreated = [
     active: true,
     icon: '💬',
   },
+  {
+    name: 'FullDictationAI',
+    description: 'Create English dictations with AI: play the audio, then reveal the text and its Spanish translation.',
+    href: '/fulldictationai',
+    active: true,
+    icon: '🎧',
+  },
   { name: 'Coming Soon', description: 'Another app coming to the JaviDevEdu ecosystem.', active: false, icon: '💡' },
 ];
 
