@@ -50,6 +50,8 @@ const App = () => (
             <Route path="/pbl/activity/:activityId" element={<PBLStart />} />
             <Route path="/pbl/activity/:activityId/chat/:sessionId" element={<PBLChat />} />
             <Route path="/pbl/activity/:activityId/results/:sessionId" element={<PBLResults />} />
+            <Route path="/fulldictationai" element={<FullDictationAI />} />
+            <Route path="/FullDictationAI" element={<FullDictationAI />} />
             <Route path="/projects/book-review" element={<BookReview />} />
             <Route path="/projects/travel-recommendation" element={<TravelRecommendation />} />
             <Route path="/projects/javidev-site" element={<JavidevSite />} />
