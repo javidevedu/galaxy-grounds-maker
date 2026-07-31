@@ -55,6 +55,14 @@ export default {
           DEFAULT: "hsl(var(--success))",
           foreground: "hsl(var(--success-foreground))",
         },
+        gram: {
+          subject: "hsl(var(--gram-subject))",
+          auxiliary: "hsl(var(--gram-auxiliary))",
+          verb: "hsl(var(--gram-verb))",
+          object: "hsl(var(--gram-object))",
+          adverbial: "hsl(var(--gram-adverbial))",
+          other: "hsl(var(--gram-other))",
+        },
         warning: {
           DEFAULT: "hsl(var(--warning))",
           foreground: "hsl(var(--warning-foreground))",

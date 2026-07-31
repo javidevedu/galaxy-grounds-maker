@@ -12,16 +12,33 @@ import { supabase } from '@/integrations/supabase/client';
 import { ENGLISH_TOPICS } from '@/constants/englishTopics';
 import { Headphones, Loader2, Play, Square, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
+interface Part {
+  text: string;
+  role: string;
+}
+
 interface Paragraph {
   english: string;
   spanish: string;
+  parts?: Part[];
 }
+
+const ROLE_STYLES: Record<string, { color: string; label: string }> = {
+  subject: { color: 'text-gram-subject', label: 'Sujeto' },
+  auxiliary: { color: 'text-gram-auxiliary', label: 'Auxiliar' },
+  verb: { color: 'text-gram-verb', label: 'Verbo' },
+  object: { color: 'text-gram-object', label: 'Complemento' },
+  adverbial: { color: 'text-gram-adverbial', label: 'Adverbial' },
+  other: { color: 'text-gram-other', label: 'Otros' },
+};
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
 export default function FullDictationAI() {
   const [topic, setTopic] = useState('');
-  const [customTopic, setCustomTopic] = useState('');
+  const [topicQuery, setTopicQuery] = useState('');
+  const [topicOpen, setTopicOpen] = useState(false);
+  const topicBoxRef = useRef<HTMLDivElement>(null);
   const [level, setLevel] = useState('A2');
   const [count, setCount] = useState('1');
   const [context, setContext] = useState('');
@@ -45,7 +62,21 @@ export default function FullDictationAI() {
     };
   }, []);
 
-  const finalTopic = useMemo(() => (topic === '__custom__' ? customTopic : topic), [topic, customTopic]);
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      if (topicBoxRef.current && !topicBoxRef.current.contains(e.target as Node)) setTopicOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, []);
+
+  const filteredTopics = useMemo(() => {
+    const q = topicQuery.trim().toLowerCase();
+    const list = q ? ENGLISH_TOPICS.filter((t) => t.toLowerCase().includes(q)) : ENGLISH_TOPICS;
+    return list.slice(0, 12);
+  }, [topicQuery]);
+
+  const finalTopic = topic;
 
   const generate = async () => {
     if (!finalTopic.trim()) {
@@ -118,25 +149,40 @@ export default function FullDictationAI() {
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
+              <div className="space-y-2 relative" ref={topicBoxRef}>
                 <Label>Tema principal</Label>
-                <Select value={topic} onValueChange={setTopic}>
-                  <SelectTrigger><SelectValue placeholder="Escoge un tema" /></SelectTrigger>
-                  <SelectContent className="max-h-72">
-                    {ENGLISH_TOPICS.map((t) => (
-                      <SelectItem key={t} value={t}>{t}</SelectItem>
+                <Input
+                  value={topicQuery}
+                  onChange={(e) => {
+                    setTopicQuery(e.target.value);
+                    setTopic(e.target.value);
+                    setTopicOpen(true);
+                  }}
+                  onFocus={() => setTopicOpen(true)}
+                  placeholder="Escribe iniciales del tema (ej. pres, voc...)"
+                  maxLength={200}
+                />
+                {topicOpen && filteredTopics.length > 0 && (
+                  <div className="absolute z-50 top-full mt-1 w-full max-h-56 overflow-y-auto rounded-md border bg-popover p-1 shadow-md">
+                    {filteredTopics.map((t) => (
+                      <button
+                        key={t}
+                        type="button"
+                        onClick={() => {
+                          setTopic(t);
+                          setTopicQuery(t);
+                          setTopicOpen(false);
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm rounded-sm hover:bg-accent hover:text-accent-foreground transition-colors"
+                      >
+                        {t}
+                      </button>
                     ))}
-                    <SelectItem value="__custom__">Otro (escribir)</SelectItem>
-                  </SelectContent>
-                </Select>
-                {topic === '__custom__' && (
-                  <Input
-                    value={customTopic}
-                    onChange={(e) => setCustomTopic(e.target.value)}
-                    placeholder="Escribe el tema"
-                    maxLength={200}
-                  />
+                  </div>
                 )}
+                <p className="text-xs text-muted-foreground">
+                  Puedes escoger de la lista o escribir tu propio tema.
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -183,6 +229,13 @@ export default function FullDictationAI() {
 
         {paragraphs.length > 0 && (
           <div className="space-y-4">
+            {revealed && (
+              <div className="flex flex-wrap gap-3 rounded-lg border p-3 text-xs">
+                {Object.entries(ROLE_STYLES).map(([role, s]) => (
+                  <span key={role} className={`${s.color} font-medium`}>● {s.label}</span>
+                ))}
+              </div>
+            )}
             {paragraphs.map((p, i) => (
               <Card key={i}>
                 <CardHeader className="pb-3">
@@ -201,7 +254,20 @@ export default function FullDictationAI() {
 
                   {revealed ? (
                     <div className="space-y-3 rounded-lg border p-4 bg-muted/40">
-                      <p className="leading-relaxed">{p.english}</p>
+                      {p.parts?.length ? (
+                        <p className="leading-relaxed">
+                          {p.parts.map((part, k) => (
+                            <span
+                              key={k}
+                              className={`${(ROLE_STYLES[part.role] ?? ROLE_STYLES.other).color} font-medium`}
+                            >
+                              {part.text}{k < p.parts!.length - 1 ? ' ' : ''}
+                            </span>
+                          ))}
+                        </p>
+                      ) : (
+                        <p className="leading-relaxed">{p.english}</p>
+                      )}
                       <p className="text-sm text-muted-foreground italic leading-relaxed">{p.spanish}</p>
                     </div>
                   ) : (

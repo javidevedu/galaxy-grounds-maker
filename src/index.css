@@ -53,6 +53,14 @@
 
     --font-heading: 'Space Grotesk', sans-serif;
     --font-body: 'Inter', sans-serif;
+
+    /* Grammar highlighting */
+    --gram-subject: 271 76% 53%;
+    --gram-auxiliary: 0 78% 52%;
+    --gram-verb: 142 62% 34%;
+    --gram-object: 217 91% 50%;
+    --gram-adverbial: 32 90% 42%;
+    --gram-other: 215 15% 45%;
   }
 }
 
