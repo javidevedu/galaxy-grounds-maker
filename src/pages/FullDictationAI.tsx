@@ -229,6 +229,13 @@ export default function FullDictationAI() {
 
         {paragraphs.length > 0 && (
           <div className="space-y-4">
+            {revealed && (
+              <div className="flex flex-wrap gap-3 rounded-lg border p-3 text-xs">
+                {Object.entries(ROLE_STYLES).map(([role, s]) => (
+                  <span key={role} className={`${s.color} font-medium`}>● {s.label}</span>
+                ))}
+              </div>
+            )}
             {paragraphs.map((p, i) => (
               <Card key={i}>
                 <CardHeader className="pb-3">
