@@ -18,6 +18,7 @@ import PBLAdminResults from "./pages/PBLAdminResults";
 import PBLStart from "./pages/PBLStart";
 import PBLChat from "./pages/PBLChat";
 import PBLResults from "./pages/PBLResults";
+import FullDictationAI from "./pages/FullDictationAI";
 import BookReview from "./pages/projects/BookReview";
 import TravelRecommendation from "./pages/projects/TravelRecommendation";
 import JavidevSite from "./pages/projects/JavidevSite";
@@ -49,6 +50,8 @@ const App = () => (
             <Route path="/pbl/activity/:activityId" element={<PBLStart />} />
             <Route path="/pbl/activity/:activityId/chat/:sessionId" element={<PBLChat />} />
             <Route path="/pbl/activity/:activityId/results/:sessionId" element={<PBLResults />} />
+            <Route path="/fulldictationai" element={<FullDictationAI />} />
+            <Route path="/FullDictationAI" element={<FullDictationAI />} />
             <Route path="/projects/book-review" element={<BookReview />} />
             <Route path="/projects/travel-recommendation" element={<TravelRecommendation />} />
             <Route path="/projects/javidev-site" element={<JavidevSite />} />
