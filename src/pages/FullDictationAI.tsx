@@ -23,14 +23,74 @@ interface Paragraph {
   parts?: Part[];
 }
 
-const ROLE_STYLES: Record<string, { color: string; label: string }> = {
-  subject: { color: 'text-gram-subject', label: 'Sujeto' },
-  auxiliary: { color: 'text-gram-auxiliary', label: 'Auxiliar' },
-  verb: { color: 'text-gram-verb', label: 'Verbo' },
-  object: { color: 'text-gram-object', label: 'Complemento' },
-  adverbial: { color: 'text-gram-adverbial', label: 'Adverbial' },
-  other: { color: 'text-gram-other', label: 'Otros' },
+const ROLE_STYLES: Record<string, { varName: string; label: string }> = {
+  subject: { varName: '--gram-subject', label: 'Sujeto' },
+  auxiliary: { varName: '--gram-auxiliary', label: 'Auxiliar' },
+  verb: { varName: '--gram-verb', label: 'Verbo' },
+  object: { varName: '--gram-object', label: 'Complemento' },
+  adverbial: { varName: '--gram-adverbial', label: 'Adverbial' },
+  other: { varName: '--gram-other', label: 'Otros' },
 };
+
+const roleStyle = (role: string) => {
+  const v = (ROLE_STYLES[role] ?? ROLE_STYLES.other).varName;
+  return {
+    color: `hsl(var(${v}))`,
+    backgroundColor: `hsl(var(${v}) / 0.14)`,
+  } as React.CSSProperties;
+};
+
+const AUX = new Set([
+  'am','is','are','was','were','be','been','being','do','does','did','have','has','had',
+  'will','would','can','could','shall','should','may','might','must',
+  "don't","doesn't","didn't","isn't","aren't","wasn't","weren't","can't","won't","couldn't","shouldn't","wouldn't","haven't","hasn't","hadn't",
+]);
+const SUBJ_PRON = new Set(['i','you','he','she','it','we','they','there','this','that','these','those']);
+const DET = new Set(['the','a','an','my','your','his','her','its','our','their','every','each','some','many','most','one','two','three']);
+const PREP = new Set(['in','on','at','to','from','with','without','by','for','into','onto','during','after','before','until','over','under','near','about','between','through','around','because','when','while','yesterday','today','tomorrow','now','then','always','never','often','usually','sometimes','soon','later','again']);
+
+// Etiquetado gramatical aproximado en el cliente (respaldo si la IA no envía "parts")
+const heuristicParts = (text: string): Part[] => {
+  const out: Part[] = [];
+  const sentences = text.split(/(?<=[.!?])\s+/);
+  for (const sentence of sentences) {
+    const words = sentence.split(/\s+/).filter(Boolean);
+    let stage: 'subject' | 'predicate' = 'subject';
+    let verbSeen = false;
+    words.forEach((w) => {
+      const clean = w.toLowerCase().replace(/[^a-z']/g, '');
+      let role: string;
+      if (AUX.has(clean)) {
+        role = 'auxiliary';
+        stage = 'predicate';
+      } else if (PREP.has(clean) || /ly$/.test(clean)) {
+        role = 'adverbial';
+      } else if (stage === 'subject') {
+        role = SUBJ_PRON.has(clean) || DET.has(clean) || true ? 'subject' : 'subject';
+        if (SUBJ_PRON.has(clean)) stage = 'subject';
+      } else if (!verbSeen) {
+        role = 'verb';
+        verbSeen = true;
+      } else {
+        role = 'object';
+      }
+      // el primer token no auxiliar tras el sujeto inicial se considera verbo
+      if (stage === 'subject' && role === 'subject' && out.length > 0) {
+        const prev = out[out.length - 1];
+        if (prev.role === 'subject' && (SUBJ_PRON.has(prev.text.toLowerCase().replace(/[^a-z']/g, '')) || !DET.has(clean))) {
+          if (!DET.has(clean) && (SUBJ_PRON.has(prev.text.toLowerCase().replace(/[^a-z']/g, '')) || !DET.has(prev.text.toLowerCase()))) {
+            role = 'verb';
+            stage = 'predicate';
+            verbSeen = true;
+          }
+        }
+      }
+      out.push({ text: w, role });
+    });
+  }
+  return out;
+};
+
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'];
 
