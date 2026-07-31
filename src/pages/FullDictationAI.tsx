@@ -216,7 +216,20 @@ export default function FullDictationAI() {
 
                   {revealed ? (
                     <div className="space-y-3 rounded-lg border p-4 bg-muted/40">
-                      <p className="leading-relaxed">{p.english}</p>
+                      {p.parts?.length ? (
+                        <p className="leading-relaxed">
+                          {p.parts.map((part, k) => (
+                            <span
+                              key={k}
+                              className={`${(ROLE_STYLES[part.role] ?? ROLE_STYLES.other).color} font-medium`}
+                            >
+                              {part.text}{k < p.parts!.length - 1 ? ' ' : ''}
+                            </span>
+                          ))}
+                        </p>
+                      ) : (
+                        <p className="leading-relaxed">{p.english}</p>
+                      )}
                       <p className="text-sm text-muted-foreground italic leading-relaxed">{p.spanish}</p>
                     </div>
                   ) : (
