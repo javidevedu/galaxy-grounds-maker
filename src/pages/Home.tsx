@@ -153,15 +153,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Scroll down */}
-        <div style={{
-          position: 'absolute', bottom: '3rem', left: '50%', transform: 'translateX(-50%)',
-          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem',
-          color: 'rgba(255,255,255,0.5)', fontSize: '0.95rem', animation: 'bounce 2s infinite', zIndex: 30
-        }}>
-          <span>Scroll to explore</span>
-          <i className="fas fa-chevron-down" style={{ fontSize: '1.7rem' }} />
-        </div>
+
+        {/* Removed scroll to explore */}
+
 
         {/* Animaciones */}
         <style>{`
